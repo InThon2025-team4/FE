@@ -1,12 +1,19 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ApplyModal } from "./ApplyModal";
 
 export function ViewProject() {
+  const router = useRouter();
+  const [applyModalOpen, setApplyModalOpen] = useState(false);
+
   // Mock data - replace with actual data from props or API
   const projectData = {
+    id: "project-123", // Add project ID for API calls
     title: "프로젝트 제목입니다",
     status: "모집 중",
     author: {
@@ -26,6 +33,35 @@ export function ViewProject() {
     duration: "1 개월",
     difficulty: "높음",
     description: "",
+  };
+
+  // Prepare available positions for the modal
+  const availablePositions = [
+    {
+      label: "프론트엔드",
+      value: "frontend",
+      available: projectData.positions.frontend !== "마감",
+    },
+    {
+      label: "백엔드",
+      value: "backend",
+      available: projectData.positions.backend !== "마감",
+    },
+    {
+      label: "인공지능",
+      value: "ai",
+      available: projectData.positions.ai !== "마감",
+    },
+    {
+      label: "모바일",
+      value: "mobile",
+      available: projectData.positions.mobile !== "마감",
+    },
+  ];
+
+  const handleApplySuccess = () => {
+    // Navigate back to viewProject page (refresh or go to project list)
+    router.refresh();
   };
 
   return (
@@ -53,7 +89,7 @@ export function ViewProject() {
       </header>
 
       {/* Main Content */}
-      <main className="w-full max-w-[1156px] mx-auto px-[20px] py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
+      <main className="w-full max-w-[1156px] mx-auto px-5 py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
         {/* Title and Status Section */}
         <div className="w-full flex flex-col items-center gap-[15px] pt-[66px]">
           {/* Title Row */}
@@ -144,7 +180,10 @@ export function ViewProject() {
 
         {/* Apply Button Section */}
         <div className="w-full flex flex-col items-end gap-2.5 px-[45px]">
-          <Button className="bg-[#771F21] hover:bg-[#771F21]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg">
+          <Button
+            onClick={() => setApplyModalOpen(true)}
+            className="bg-[#771F21] hover:bg-[#771F21]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg"
+          >
             지원하기
           </Button>
         </div>
@@ -170,6 +209,15 @@ export function ViewProject() {
           </div>
         </div>
       </main>
+
+      {/* Apply Modal */}
+      <ApplyModal
+        open={applyModalOpen}
+        onOpenChange={setApplyModalOpen}
+        projectId={projectData.id}
+        availablePositions={availablePositions}
+        onSuccess={handleApplySuccess}
+      />
     </div>
   );
 }
