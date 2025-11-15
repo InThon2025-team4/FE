@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signUp, signInWithGoogle } from "@/lib/auth";
 
 export function SignupCard({
@@ -26,6 +27,7 @@ export function SignupCard({
 }: {
   setProgress: (value: number) => void;
 }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -65,13 +67,17 @@ export function SignupCard({
       if (result.success) {
         setPopupTitle("성공");
         setPopupMessage(
-          result.message || "회원가입이 완료되었습니다. 이메일을 확인해주세요."
+          result.message || "회원가입이 완료되었습니다. 온보딩을 진행해주세요."
         );
         setPopupOpen(true);
 
-        // Move to next step after showing success message
+        // Redirect to onboarding after showing success message
         setTimeout(() => {
-          setProgress(100);
+          if (result.user?.id) {
+            router.push(`/onboarding?supabaseUid=${result.user.id}&email=${email}`);
+          } else {
+            setProgress(100);
+          }
         }, 1500);
       } else {
         setPopupTitle("오류");

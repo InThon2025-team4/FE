@@ -1,6 +1,29 @@
 import axios from "axios";
 import { supabase } from "./supabase";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Server User type from backend
+export interface User {
+  id: string;
+  supabaseUid: string;
+  authProvider: string;
+  email: string;
+  name: string;
+  phone: string;
+  githubId: string;
+  profileImageUrl: string | null;
+  techStacks: string[]; // TechStack enum
+  positions: string[]; // Position enum
+  proficiency: string; // Proficiency enum
+  portfolio: Record<string, unknown> | null;
+  createdAt: Date;
+  updatedAt: Date;
+  createdProjects?: unknown[];
+  projectsAsMember?: unknown[];
+  applications?: unknown[];
+}
+
 export interface SignUpData {
   email: string;
   password: string;
@@ -15,16 +38,93 @@ export interface SignInData {
   password: string;
 }
 
+export interface OnboardingData {
+  name: string;
+  phone?: string;
+  github?: string;
+  techStack: string[];
+  position?: string[];
+  portfolio?: string;
+}
+
 export interface AuthResponse {
   success: boolean;
   message?: string;
-  user?: unknown;
+  user?: User;
   session?: unknown;
+  token?: string;
   error?: unknown;
+  onboardingRequired?: boolean;
+  supabaseUid?: string;
+  email?: string;
 }
 
 /**
- * Sign up a new user with email and password
+ * Helper function to store JWT token
+ */
+function storeToken(token: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("jwtToken", token);
+  }
+}
+
+/**
+ * Helper function to get stored JWT token
+ */
+export function getStoredToken(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("jwtToken");
+  }
+  return null;
+}
+
+/**
+ * Helper function to clear stored token
+ */
+function clearToken(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("jwtToken");
+  }
+}
+
+/**
+ * Make authenticated API request with JWT token
+ * 
+ * Usage:
+ * const response = await authenticatedFetch('/users/profile', {
+ *   method: 'GET'
+ * });
+ */
+export async function authenticatedFetch(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const token = getStoredToken();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  if (options.headers && typeof options.headers === "object") {
+    Object.assign(headers, options.headers);
+  }
+
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${API_BASE_URL}${endpoint}`;
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+}
+
+/**
+ * Sign up a new user with email and password (Supabase)
  */
 export async function signUp(data: SignUpData): Promise<AuthResponse> {
   try {
@@ -121,8 +221,10 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
 
     // Case 3: Unexpected response from Supabase
     return {
-      success: false,
-      message: "알 수 없는 오류가 발생했습니다.",
+      success: true,
+      message: "회원가입이 완료되었습니다. 이메일을 확인해주세요.",
+      user: authData.user as unknown as User | undefined,
+      session: authData.session,
     };
   } catch (error) {
     const errorMessage =
@@ -138,12 +240,22 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
 }
 
 /**
- * Sign in an existing user with email and password
+ * Sign in with Supabase and send accessToken to backend
+ * 
+ * Flow:
+ * 1. Get accessToken from Supabase
+ * 2. Send to BE /auth/supabase endpoint
+ * 3. BE validates token and checks if user exists
+ * 4. If existing user: return JWT token
+ * 5. If new user: return onboardingRequired flag
  */
-export async function signIn(data: SignInData): Promise<AuthResponse> {
+export async function signInWithSupabase(
+  data: SignInData
+): Promise<AuthResponse> {
   try {
     const { email, password } = data;
 
+    // Step 1: Get accessToken from Supabase
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({
         email,
@@ -158,45 +270,126 @@ export async function signIn(data: SignInData): Promise<AuthResponse> {
       };
     }
 
-    if (authData.user && authData.session) {
-      // Get AccessToken from your backend
-      try {
-        const supabaseAccessToken = authData.session.access_token;
-        const response = await axios.post("/auth/supabase/", {
-          accessToken: supabaseAccessToken,
-        });
+    if (!authData.session?.access_token) {
+      return {
+        success: false,
+        message: "액세스 토큰을 획득하지 못했습니다.",
+        error: new Error("No access token"),
+      };
+    }
 
-        if (response.data.access_token) {
-          localStorage.setItem("accessToken", response.data.access_token);
-          return {
-            success: true,
-            message: "로그인 성공!",
-            user: authData.user,
-            session: authData.session,
-          };
-        } else {
-          throw new Error("백엔드로부터 AccessToken을 받지 못했습니다.");
-        }
-      } catch (apiError) {
-        const errorMessage =
-          apiError instanceof Error
-            ? apiError.message
-            : "API 서버와 통신 중 오류가 발생했습니다.";
-        return {
-          success: false,
-          message: errorMessage,
-          error: apiError,
-        };
-      }
+    // Step 2: Send accessToken to backend
+    const response = await fetch(`${API_BASE_URL}/auth/supabase`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accessToken: authData.session.access_token,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        message: errorData.message || "백엔드 인증 실패",
+        error: errorData,
+      };
+    }
+
+    const beResponse = await response.json();
+
+    // Step 3: Check if onboarding is required
+    if (beResponse.onboardingRequired) {
+      return {
+        success: false,
+        message: "온보딩이 필요합니다.",
+        onboardingRequired: true,
+        supabaseUid: beResponse.supabaseUid,
+        email: beResponse.email,
+        error: null,
+      };
+    }
+
+    // Step 4: Store JWT token and return success
+    if (beResponse.token) {
+      storeToken(beResponse.token);
     }
 
     return {
-      success: false,
-      message: "로그인에 실패했습니다. 사용자 정보나 세션을 찾을 수 없습니다.",
+      success: true,
+      message: "로그인 성공!",
+      token: beResponse.token,
+      user: beResponse.user,
+      error: null,
     };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+    return {
+      success: false,
+      message: errorMessage,
+      error,
+    };
+  }
+}
+
+/**
+ * Sign in an existing user with email and password (legacy)
+ */
+/**
+ * Complete onboarding for new users
+ * 
+ * Flow:
+ * 1. Send accessToken + onboarding data to BE /auth/onboard
+ * 2. BE creates user profile and returns JWT token
+ * 3. Store JWT token for future authenticated requests
+ */
+export async function completeOnboarding(
+  accessToken: string,
+  onboardingData: OnboardingData
+): Promise<AuthResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/onboard`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accessToken,
+        ...onboardingData,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        message: errorData.message || "온보딩 실패",
+        error: errorData,
+      };
+    }
+
+    const beResponse = await response.json();
+
+    // Store JWT token
+    if (beResponse.token) {
+      storeToken(beResponse.token);
+    }
+
+    return {
+      success: true,
+      message: "온보딩 완료! 로그인되었습니다.",
+      token: beResponse.token,
+      user: beResponse.user,
+      error: null,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "온보딩 중 오류가 발생했습니다.";
     return {
       success: false,
       message: errorMessage,
@@ -211,6 +404,7 @@ export async function signIn(data: SignInData): Promise<AuthResponse> {
 export async function signOut(): Promise<AuthResponse> {
   try {
     const { error } = await supabase.auth.signOut();
+    clearToken();
 
     if (error) {
       return {

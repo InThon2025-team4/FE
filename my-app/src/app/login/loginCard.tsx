@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { signIn, signInWithGoogle } from "@/lib/auth";
+import { signInWithSupabase, signInWithGoogle } from "@/lib/auth";
 
 export function LoginCard() {
   const router = useRouter();
@@ -37,12 +37,22 @@ export function LoginCard() {
     setLoading(true);
 
     try {
-      const result = await signIn({
+      const result = await signInWithSupabase({
         email,
         password,
       });
 
-      if (result.success) {
+      if (result.onboardingRequired) {
+        // New user - redirect to onboarding
+        setDialogTitle("환영합니다!");
+        setDialogMessage("추가 정보를 입력해주세요.");
+        setDialogOpen(true);
+
+        setTimeout(() => {
+          router.push(`/onboarding?supabaseUid=${result.supabaseUid}&email=${result.email}`);
+        }, 1500);
+      } else if (result.success) {
+        // Existing user - login successful
         setDialogTitle("성공");
         setDialogMessage(result.message || "로그인 성공!");
         setDialogOpen(true);
