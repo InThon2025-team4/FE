@@ -121,9 +121,9 @@ export function SignupCard() {
         </DialogContent>
       </Dialog>
       <Card className="w-full max-w-sm border-none shadow-none ">
-        <CardHeader className="text-center">
-          <CardTitle>Signup</CardTitle>
-          <CardDescription>make your account</CardDescription>
+        <CardHeader className="text-left">
+          <CardTitle>회원가입</CardTitle>
+          <CardDescription>기본 정보를 입력하세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -182,20 +182,11 @@ export function SignupCard() {
         <CardFooter className="flex-col gap-2">
           <Button
             type="button"
-            className="w-full"
+            className="w-full bg-[var(--color-red)]"
             onClick={handleSignUp}
             disabled={loading}
           >
-            {loading ? "처리 중..." : "Signup"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleSignup}
-            disabled={loading}
-          >
-            Signup with Google
+            {loading ? "처리 중..." : "회원가입"}
           </Button>
         </CardFooter>
       </Card>

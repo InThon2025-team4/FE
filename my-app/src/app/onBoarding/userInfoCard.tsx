@@ -47,9 +47,9 @@ export function UserInfoCard({ onNext }: UserInfoCardProps) {
   return (
     <>
       <Card className="w-full max-w-sm border-none shadow-none">
-        <CardHeader className="text-center">
-          <CardTitle>Signup</CardTitle>
-          <CardDescription>make your account</CardDescription>
+        <CardHeader className="text-left">
+          <CardTitle>프로필 정보 입력</CardTitle>
+          <CardDescription>팀 매칭을 위한 정보를 입력하세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -82,7 +82,7 @@ export function UserInfoCard({ onNext }: UserInfoCardProps) {
         <CardFooter className="flex-col gap-2">
           <Button
             type="button"
-            className="w-full"
+            className="w-full bg-[var(--color-red)]"
             onClick={() => {
               if (techStack.length === 0) {
                 alert("기술 스택을 선택해주세요.");
