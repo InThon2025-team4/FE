@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/Header";
 import { ProjectCard } from "./ProjectCard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getDashboardProjects, Project } from "@/lib/api/projects";
 
-// Mock data for projects
+// Mock data for projects (fallback)
 const mockProjects = [
   {
     id: 1,
@@ -84,8 +85,103 @@ const mockProjects = [
   },
 ];
 
+interface DisplayProject {
+  id: string;
+  title: string;
+  daysAgo: string;
+  difficulty: "쉬움" | "보통" | "어려움";
+  positions: string[];
+  deadline: string;
+}
+
 export default function DashboardView() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [projects, setProjects] = useState<DisplayProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch projects on component mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getDashboardProjects();
+        if (response.success && response.data) {
+          // Transform API data to display format
+          const transformedProjects = response.data.map((project: Project) => ({
+            id: project.id,
+            title: project.title,
+            daysAgo: calculateDaysAgo(project.createdAt),
+            difficulty: mapDifficulty(project.difficulty),
+            positions: extractPositions(project.positions),
+            deadline: formatDate(project.deadline),
+          }));
+          setProjects(transformedProjects);
+        } else {
+          // Use mock data as fallback
+          setProjects(mockProjects.map((p) => ({ ...p, id: p.id.toString() })));
+        }
+      } catch (err) {
+        console.error("Error loading projects:", err);
+        setError("Failed to load projects");
+        // Use mock data as fallback
+        setProjects(mockProjects.map((p) => ({ ...p, id: p.id.toString() })));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  // Helper functions for data transformation
+  const calculateDaysAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "오늘";
+    if (diffDays === 1) return "1일 전";
+    return `${diffDays}일 전`;
+  };
+
+  const mapDifficulty = (difficulty: string): "쉬움" | "보통" | "어려움" => {
+    const lowerDiff = difficulty.toLowerCase();
+    if (lowerDiff.includes("easy") || lowerDiff.includes("쉬움")) return "쉬움";
+    if (lowerDiff.includes("hard") || lowerDiff.includes("어려움"))
+      return "어려움";
+    return "보통";
+  };
+
+  const extractPositions = (positions: {
+    frontend?: string;
+    backend?: string;
+    ai?: string;
+    mobile?: string;
+  }): string[] => {
+    const result: string[] = [];
+    if (positions.frontend && positions.frontend !== "마감")
+      result.push("프론트엔드");
+    if (positions.backend && positions.backend !== "마감")
+      result.push("백엔드");
+    if (positions.ai && positions.ai !== "마감") result.push("인공지능");
+    if (positions.mobile && positions.mobile !== "마감") result.push("모바일");
+    return result.length > 0 ? result : ["프론트엔드", "백엔드"];
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}. ${month}. ${day}`;
+  };
+
+  // Filter projects based on search query
+  const filteredProjects = projects.filter((project) =>
+    project.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // utility to split projects into rows of `size`
   const chunk = <T,>(arr: T[], size: number) => {
@@ -134,19 +230,33 @@ export default function DashboardView() {
 
         {/* Projects Grid */}
         <div className="flex flex-col gap-6 w-[1116px]">
-          {chunk(mockProjects, 3).map((row, rowIndex) => (
-            <div key={rowIndex} className="flex items-center gap-4">
-              {row.map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/viewProject/${project.id}`}
-                  className="block"
-                >
-                  <ProjectCard {...project} />
-                </Link>
-              ))}
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#DC143C]"></div>
             </div>
-          ))}
+          ) : error ? (
+            <div className="flex justify-center items-center py-20">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="flex justify-center items-center py-20">
+              <p className="text-gray-500">프로젝트가 없습니다</p>
+            </div>
+          ) : (
+            chunk(filteredProjects, 3).map((row, rowIndex) => (
+              <div key={rowIndex} className="flex items-center gap-4">
+                {row.map((project) => (
+                  <Link
+                    key={project.id}
+                    href={`/viewProject/${project.id}`}
+                    className="block"
+                  >
+                    <ProjectCard {...project} />
+                  </Link>
+                ))}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
