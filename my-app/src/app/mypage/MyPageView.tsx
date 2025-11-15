@@ -8,6 +8,8 @@ import { Header } from "@/components/Header";
 import { UserProfileSection } from "./UserProfileSection";
 import { EditProfileDialog } from "./EditProfileDialog";
 import { AppliedProjectsSection } from "./AppliedProjectsSection";
+import { OwnedProjectsSection } from "./OwnedProjectsSection";
+import App from "next/app";
 
 export interface UserProfile {
   name: string;
@@ -71,6 +73,42 @@ export function MyPageView() {
       deadline: "2025. 11. 12",
       positions: ["Backend", "AI"],
     },
+    {
+      id: "4",
+      title: "세 번째 프로젝트",
+      description: "세 번째 프로젝트 설명입니다.",
+      status: "rejected",
+      appliedDate: "2025. 11. 05",
+      deadline: "2025. 11. 12",
+      positions: ["Backend", "AI"],
+    },
+  ]);
+
+  // track which tab is active: 'applied' = 지원한 프로젝트, 'owned' = 내 프로젝트
+  const [selectedTab, setSelectedTab] = useState<"applied" | "owned">(
+    "applied"
+  );
+
+  // mock "내 프로젝트" list (replace with real data)
+  const [ownedProjects] = useState<AppliedProject[]>([
+    {
+      id: "o1",
+      title: "내 프로젝트 A",
+      description: "내가 만든 프로젝트 A 설명",
+      status: "accepted",
+      appliedDate: "2025. 10. 01",
+      deadline: "2025. 12. 01",
+      positions: ["Frontend"],
+    },
+    {
+      id: "o2",
+      title: "내 프로젝트 B",
+      description: "내가 만든 프로젝트 B 설명",
+      status: "pending",
+      appliedDate: "2025. 09. 15",
+      deadline: "2025. 11. 30",
+      positions: ["Backend", "AI"],
+    },
   ]);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -112,12 +150,41 @@ export function MyPageView() {
 
           <Separator />
 
-          {/* Applied Projects Section */}
+          {/* Applied / Owned Projects Section */}
           <div className="flex flex-col gap-4">
+            {/* Tabs */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedTab("applied")}
+                aria-pressed={selectedTab === "applied"}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                  selectedTab === "applied" ? "text-black" : "text-gray-400"
+                }`}
+              >
+                지원한 프로젝트
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedTab("owned")}
+                aria-pressed={selectedTab === "owned"}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                  selectedTab === "owned" ? "text-black" : "text-gray-400"
+                }`}
+              >
+                내 프로젝트
+              </button>
+            </div>
+
             <h3 className="text-2xl font-semibold text-black">
-              지원한 프로젝트
+              {selectedTab === "applied" ? "지원한 프로젝트" : "내 프로젝트"}
             </h3>
-            <AppliedProjectsSection projects={appliedProjects} />
+            {selectedTab === "applied" && (
+              <AppliedProjectsSection projects={appliedProjects} />
+            )}
+            {selectedTab === "owned" && (
+              <OwnedProjectsSection projects={ownedProjects} />
+            )}
           </div>
         </div>
       </main>
