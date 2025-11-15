@@ -1,91 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ApplyModal } from "./[id]/ApplyModal";
-import { getProjectById, Project } from "@/lib/api/projects";
+import { ApplyModal } from "./ApplyModal";
+import { Header } from "@/components/Header";
 
 export function ViewProject() {
   const router = useRouter();
-  const params = useParams();
   const [applyModalOpen, setApplyModalOpen] = useState(false);
-  const [projectData, setProjectData] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch project data on mount
-  useEffect(() => {
-    const fetchProject = async () => {
-      const projectId = params?.id as string;
-      if (!projectId) {
-        setError("Project ID not found");
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await getProjectById(projectId);
-        if (response.success && response.data) {
-          setProjectData(response.data);
-        } else {
-          setError(response.message || "Failed to load project");
-        }
-      } catch (err) {
-        console.error("Error loading project:", err);
-        setError("Failed to load project details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProject();
-  }, [params?.id]);
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#DC143C]"></div>
-          <p className="mt-4 text-gray-600">프로젝트 로딩 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error || !projectData) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500">
-            {error || "프로젝트를 찾을 수 없습니다"}
-          </p>
-          <Button
-            onClick={() => router.push("/dashboard")}
-            className="mt-4 bg-[#771F21] hover:bg-[#771F21]/90"
-          >
-            대시보드로 돌아가기
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Helper function to get user initials
-  const getUserInitials = (name: string): string => {
-    if (!name) return "U";
-    const nameParts = name.split(" ");
-    if (nameParts.length >= 2) {
-      return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
+  // Mock data - replace with actual data from props or API
+  const projectData = {
+    id: "project-123", // Add project ID for API calls
+    title: "프로젝트 제목입니다",
+    status: "모집 중",
+    author: {
+      name: "사용자 이름",
+      avatar: null,
+      initials: "CN",
+    },
+    createdAt: "2025. 11. 14",
+    startDate: "2025. 11. 29",
+    deadline: "2025. 11. 20",
+    positions: {
+      frontend: "마감",
+      backend: "2 명",
+      ai: "1 명",
+      mobile: "마감",
+    },
+    duration: "1 개월",
+    difficulty: "높음",
+    description: "",
   };
 
   // Prepare available positions for the modal
@@ -93,32 +41,22 @@ export function ViewProject() {
     {
       label: "프론트엔드",
       value: "frontend",
-      available: Boolean(
-        projectData.positions?.frontend &&
-          projectData.positions.frontend !== "마감"
-      ),
+      available: projectData.positions.frontend !== "마감",
     },
     {
       label: "백엔드",
       value: "backend",
-      available: Boolean(
-        projectData.positions?.backend &&
-          projectData.positions.backend !== "마감"
-      ),
+      available: projectData.positions.backend !== "마감",
     },
     {
       label: "인공지능",
       value: "ai",
-      available: Boolean(
-        projectData.positions?.ai && projectData.positions.ai !== "마감"
-      ),
+      available: projectData.positions.ai !== "마감",
     },
     {
       label: "모바일",
       value: "mobile",
-      available: Boolean(
-        projectData.positions?.mobile && projectData.positions.mobile !== "마감"
-      ),
+      available: projectData.positions.mobile !== "마감",
     },
   ];
 
@@ -130,26 +68,7 @@ export function ViewProject() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="h-16 border-b border-[#E5E5E5] flex items-center justify-center">
-        <div className="w-full max-w-[1440px] px-6 flex items-center justify-between">
-          {/* Logo Section */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded border-2 border-[#DC143C]" />
-            <h1 className="text-base font-semibold text-[#0A0A0A]">
-              Service Name
-            </h1>
-          </div>
-
-          {/* User Avatar */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {getUserInitials(projectData.author.name)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header userInitials="CN" showUser={true} />
 
       {/* Main Content */}
       <main className="w-full max-w-[1156px] mx-auto px-5 py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
@@ -176,7 +95,7 @@ export function ViewProject() {
           <div className="w-full flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0">
               <span className="text-sm font-medium text-white">
-                {getUserInitials(projectData.author.name)}
+                {projectData.author.initials}
               </span>
             </div>
             <span className="text-base font-medium text-[#0A0A0A]">
@@ -207,11 +126,11 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="프론트엔드"
-              value={projectData.positions.frontend || "마감"}
+              value={projectData.positions.frontend}
             />
             <ProjectDetailItem
               label="백엔드"
-              value={projectData.positions.backend || "마감"}
+              value={projectData.positions.backend}
             />
           </div>
 
@@ -219,11 +138,11 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="인공지능"
-              value={projectData.positions.ai || "마감"}
+              value={projectData.positions.ai}
             />
             <ProjectDetailItem
               label="모바일"
-              value={projectData.positions.mobile || "마감"}
+              value={projectData.positions.mobile}
             />
           </div>
 

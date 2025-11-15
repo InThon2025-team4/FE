@@ -1,3 +1,4 @@
+import axios from "axios";
 import { supabase } from "./supabase";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -129,6 +130,13 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
   try {
     const { email, password, name, techStack, position, portfolio } = data;
 
+    if (!/^[^\s@]+@korea\.(ac\.kr|edu)$/.test(email.trim())) {
+      return {
+        success: false,
+        message:
+          "고려대학교 이메일 주소(korea.ac.kr 또는 korea.edu)를 입력해주세요.",
+      };
+    }
     // Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -151,8 +159,18 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
       };
     }
 
-    // If user profile table exists, create profile entry
-    if (authData.user) {
+    // Case 1: User exists but is not confirmed
+    if (authData.user && !authData.session) {
+      return {
+        success: true,
+        message: "가입 확인을 위해 이메일을 확인해주세요.",
+        user: authData.user,
+      };
+    }
+
+    // Case 2: User is created and session is active
+    if (authData.user && authData.session) {
+      // Create profile entry
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: authData.user.id,
@@ -165,12 +183,43 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
         },
       ]);
 
-      // Ignore error if profiles table doesn't exist yet
       if (profileError) {
         console.warn("Profile creation warning:", profileError.message);
+        // Depending on the app's logic, you might want to return an error here
+      }
+
+      // Get AccessToken from your backend
+      try {
+        const supabaseAccessToken = authData.session.access_token;
+        const response = await axios.post("/auth/supabase/", {
+          accessToken: supabaseAccessToken,
+        });
+
+        if (response.data.access_token) {
+          localStorage.setItem("accessToken", response.data.access_token);
+          return {
+            success: true,
+            message: "회원가입이 완료되었습니다. 이메일을 확인해주세요.",
+            user: authData.user,
+            session: authData.session,
+          };
+        } else {
+          throw new Error("백엔드로부터 AccessToken을 받지 못했습니다.");
+        }
+      } catch (apiError) {
+        const errorMessage =
+          apiError instanceof Error
+            ? apiError.message
+            : "API 서버와 통신 중 오류가 발생했습니다.";
+        return {
+          success: false,
+          message: errorMessage,
+          error: apiError,
+        };
       }
     }
 
+    // Case 3: Unexpected response from Supabase
     return {
       success: true,
       message: "회원가입이 완료되었습니다. 이메일을 확인해주세요.",
@@ -364,6 +413,9 @@ export async function signOut(): Promise<AuthResponse> {
         error,
       };
     }
+
+    // Remove the accessToken from localStorage
+    localStorage.removeItem("accessToken");
 
     return {
       success: true,
