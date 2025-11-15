@@ -47,7 +47,7 @@ export function AppliedProjectsSection({
       {projects.map((project) => (
         <Link
           key={project.id}
-          href={`/viewProject?id=${project.id}`}
+          href={`/viewProject/${project.id}`}
           className="block"
         >
           <Card className="h-full hover:shadow-lg hover:border-zinc-300 transition-all duration-200 cursor-pointer">
