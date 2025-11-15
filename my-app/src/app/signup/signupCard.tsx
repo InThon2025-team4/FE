@@ -69,7 +69,11 @@ export function SignupCard() {
 
         // Redirect to onboarding after showing success message
         setTimeout(() => {
-          router.push(`/onBoarding?email=${email}`);
+          if (result.user?.id) {
+            router.push(
+              `/onBoarding?supabaseUid=${result.user.id}&email=${email}`
+            );
+          }
         }, 1500);
       } else {
         setPopupTitle("오류");

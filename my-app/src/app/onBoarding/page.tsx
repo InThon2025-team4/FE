@@ -12,7 +12,6 @@ export default function OnBoardingPage() {
   const [userInfo, setUserInfo] = useState({
     techStack: [] as string[],
     position: [] as string[],
-    portfolio: "",
   });
 
   const handleUserInfoNext = (data: {

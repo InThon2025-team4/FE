@@ -37,11 +37,7 @@ const positionTags = [
 ];
 
 interface UserInfoCardProps {
-  onNext: (data: {
-    techStack: string[];
-    position: string[];
-    portfolio?: string;
-  }) => void;
+  onNext: (data: { techStack: string[]; position: string[] }) => void;
 }
 
 export function UserInfoCard({ onNext }: UserInfoCardProps) {
