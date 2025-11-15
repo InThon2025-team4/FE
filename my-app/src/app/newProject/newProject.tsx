@@ -7,6 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+type PositionType = "FE" | "BE" | "AI" | "Mobile";
+
+interface RecruitmentCount {
+  FE: number;
+  BE: number;
+  AI: number;
+  Mobile: number;
+}
+
 export function NewProjectView() {
   const [formData, setFormData] = useState({
     title: "",
@@ -15,29 +24,96 @@ export function NewProjectView() {
     weeklyHours: "",
     deadline: "",
     description: "",
-    position: "",
-    frontendCount: 1,
   });
 
-  const handleIncrement = () => {
-    setFormData((prev) => ({
-      ...prev,
-      frontendCount: prev.frontendCount + 1,
-    }));
-  };
+  const [recruitmentCounts, setRecruitmentCounts] = useState<RecruitmentCount>({
+    FE: 0,
+    BE: 0,
+    AI: 0,
+    Mobile: 0,
+  });
 
-  const handleDecrement = () => {
-    if (formData.frontendCount > 0) {
-      setFormData((prev) => ({
+  const [selectedPositions, setSelectedPositions] = useState<PositionType[]>(
+    []
+  );
+
+  const positionOptions: { value: PositionType; label: string }[] = [
+    { value: "FE", label: "프론트엔드" },
+    { value: "BE", label: "백엔드" },
+    { value: "AI", label: "인공지능" },
+    { value: "Mobile", label: "모바일" },
+  ];
+
+  const handlePositionChange = (position: PositionType) => {
+    setSelectedPositions((prev) => {
+      if (prev.includes(position)) {
+        // Remove position
+        return prev.filter((p) => p !== position);
+      } else {
+        // Add position
+        return [...prev, position];
+      }
+    });
+
+    // Initialize count to 1 if not already set
+    if (recruitmentCounts[position] === 0) {
+      setRecruitmentCounts((prev) => ({
         ...prev,
-        frontendCount: prev.frontendCount - 1,
+        [position]: 1,
       }));
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Project data:", formData);
+  const handleCountChange = (position: PositionType, count: number) => {
+    if (count >= 0) {
+      setRecruitmentCounts((prev) => ({
+        ...prev,
+        [position]: count,
+      }));
+    }
+  };
+
+  const handleIncrement = (position: PositionType) => {
+    setRecruitmentCounts((prev) => ({
+      ...prev,
+      [position]: prev[position] + 1,
+    }));
+  };
+
+  const handleDecrement = (position: PositionType) => {
+    setRecruitmentCounts((prev) => ({
+      ...prev,
+      [position]: Math.max(0, prev[position] - 1),
+    }));
+  };
+
+  const handleSubmit = async () => {
+    // Transform form data to match server API format
+    const payload = {
+      name: formData.title,
+      description: formData.description,
+      difficulty: "INTERMEDIATE", // TODO: Add difficulty selector
+      recruitmentStartDate: new Date().toISOString(),
+      recruitmentEndDate: new Date(formData.deadline).toISOString(),
+      projectStartDate: new Date(formData.startDate).toISOString(),
+      projectEndDate: new Date(
+        new Date(formData.startDate).getTime() +
+          parseInt(formData.duration || "0") * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      githubRepoUrl: "",
+      limitFE: recruitmentCounts.FE,
+      limitBE: recruitmentCounts.BE,
+      limitAI: recruitmentCounts.AI,
+      limitMobile: recruitmentCounts.Mobile,
+    };
+
+    console.log("Project data:", payload);
     // TODO: Submit to backend API
+    // const response = await fetch('/api/projects', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(payload),
+    // });
   };
 
   return (
@@ -170,102 +246,94 @@ export function NewProjectView() {
               {/* Divider */}
               <div className="w-full h-px border-t border-[#E5E5E5]" />
 
-              {/* Position Select */}
+              {/* Position Select - Checkbox Group */}
               <div className="w-full flex flex-col gap-3">
                 <Label className="text-sm font-medium text-[#0A0A0A]">
                   포지션
                 </Label>
-                <div className="relative">
-                  <select
-                    value={formData.position}
-                    onChange={(e) =>
-                      setFormData({ ...formData, position: e.target.value })
-                    }
-                    className="w-full h-auto py-[7.5px] px-3 pr-8 text-sm bg-white border border-[#D4D4D4] rounded-lg shadow-xs appearance-none text-[#737373]"
-                  >
-                    <option value="">포지션을 선택하세요</option>
-                    <option value="frontend">프론트엔드</option>
-                    <option value="backend">백엔드</option>
-                    <option value="ai">인공지능</option>
-                    <option value="mobile">모바일</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                <div className="grid grid-cols-2 gap-3">
+                  {positionOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className="flex items-center gap-2 cursor-pointer"
                     >
-                      <path
-                        d="M4 6L8 10L12 6"
-                        stroke="#737373"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                      <input
+                        type="checkbox"
+                        checked={selectedPositions.includes(option.value)}
+                        onChange={() => handlePositionChange(option.value)}
+                        className="w-4 h-4 rounded border border-[#D4D4D4] cursor-pointer"
                       />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Frontend Recruitment Count */}
-              <div className="w-[574px] h-auto flex items-center justify-center gap-[170px]">
-                <Label className="w-[120px] flex justify-end text-sm font-medium text-[#0A0A0A]">
-                  프론트엔드 모집 인원
-                </Label>
-                <div className="flex items-center gap-[13px]">
-                  <div className="w-[87px] h-7 flex items-center bg-white border border-[#E5E5E5] rounded-md shadow-xs">
-                    {/* Minus Button */}
-                    <button
-                      type="button"
-                      onClick={handleDecrement}
-                      className="w-4 flex items-center justify-center h-full"
-                    >
-                      <svg
-                        width="10"
-                        height="2"
-                        viewBox="0 0 10 2"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M0 1H10" stroke="#0A0A0A" strokeWidth="1" />
-                      </svg>
-                    </button>
-
-                    {/* Input */}
-                    <div className="flex-1 h-full flex items-center justify-center border-x border-[#E5E5E5] px-3">
                       <span className="text-sm text-[#0A0A0A]">
-                        {formData.frontendCount}
+                        {option.label}
                       </span>
-                    </div>
-
-                    {/* Plus Button */}
-                    <button
-                      type="button"
-                      onClick={handleIncrement}
-                      className="w-4 flex items-center justify-center h-full"
-                    >
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5 0V10M0 5H10"
-                          stroke="#E5E5E5"
-                          strokeWidth="1"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <Label className="w-[52px] text-sm font-medium text-[#0A0A0A]">
-                    명
-                  </Label>
+                    </label>
+                  ))}
                 </div>
               </div>
+
+              {/* Recruitment Count for Each Selected Position */}
+              {selectedPositions.map((position) => (
+                <div
+                  key={position}
+                  className="w-full flex items-center justify-between gap-4"
+                >
+                  <Label className="text-sm font-medium text-[#0A0A0A] flex-1">
+                    {positionOptions.find((p) => p.value === position)?.label}{" "}
+                    모집 인원
+                  </Label>
+                  <div className="flex items-center gap-[13px]">
+                    <div className="w-[87px] h-7 flex items-center bg-white border border-[#E5E5E5] rounded-md shadow-xs">
+                      {/* Minus Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDecrement(position)}
+                        className="w-4 flex items-center justify-center h-full hover:bg-gray-100"
+                      >
+                        <svg
+                          width="10"
+                          height="2"
+                          viewBox="0 0 10 2"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M0 1H10" stroke="#0A0A0A" strokeWidth="1" />
+                        </svg>
+                      </button>
+
+                      {/* Input */}
+                      <div className="flex-1 h-full flex items-center justify-center border-x border-[#E5E5E5] px-3">
+                        <span className="text-sm text-[#0A0A0A]">
+                          {recruitmentCounts[position]}
+                        </span>
+                      </div>
+
+                      {/* Plus Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleIncrement(position)}
+                        className="w-4 flex items-center justify-center h-full hover:bg-gray-100"
+                      >
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 10 10"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5 0V10M0 5H10"
+                            stroke="#0A0A0A"
+                            strokeWidth="1"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <Label className="w-[20px] text-sm font-medium text-[#0A0A0A]">
+                      명
+                    </Label>
+                  </div>
+                </div>
+              ))}
 
               {/* Submit Button */}
               <Button
