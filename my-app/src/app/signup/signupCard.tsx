@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signUp, signInWithGoogle } from "@/lib/auth";
+import { signUp } from "@/lib/auth";
 
 export function SignupCard() {
   const router = useRouter();
@@ -90,24 +90,6 @@ export function SignupCard() {
     }
   };
 
-  const handleGoogleSignup = async () => {
-    setLoading(true);
-    try {
-      const result = await signInWithGoogle();
-      if (!result.success) {
-        setPopupTitle("오류");
-        setPopupMessage(result.message || "Google 회원가입에 실패했습니다.");
-        setPopupOpen(true);
-      }
-    } catch (err) {
-      console.error("Google signup error:", err);
-      setPopupTitle("오류");
-      setPopupMessage("Google 회원가입 중 문제가 발생했습니다.");
-      setPopupOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <>
       <Dialog open={popupOpen} onOpenChange={setPopupOpen}>

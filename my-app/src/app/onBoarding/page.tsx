@@ -17,12 +17,10 @@ export default function OnBoardingPage() {
   const handleUserInfoNext = (data: {
     techStack: string[];
     position: string[];
-    portfolio?: string;
   }) => {
     setUserInfo({
       techStack: data.techStack,
       position: data.position,
-      portfolio: data.portfolio || "",
     });
     setStep("dev");
     setProgress(100);
