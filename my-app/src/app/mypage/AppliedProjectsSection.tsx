@@ -8,10 +8,10 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { AppliedProject } from "./MyPageView";
+import type { Project } from "./MyPageView";
 
 interface AppliedProjectsSectionProps {
-  projects: AppliedProject[];
+  projects: Project[];
 }
 
 const statusConfig = {

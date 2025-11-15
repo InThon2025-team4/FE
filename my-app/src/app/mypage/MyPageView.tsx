@@ -22,7 +22,7 @@ export interface UserProfile {
   bio?: string;
 }
 
-export interface AppliedProject {
+export interface Project {
   id: string;
   title: string;
   description: string;
@@ -30,6 +30,7 @@ export interface AppliedProject {
   appliedDate: string;
   deadline: string;
   positions: string[];
+  applicationCount?: number;
 }
 
 export function MyPageView() {
@@ -45,7 +46,7 @@ export function MyPageView() {
   });
 
   // Mock applied projects - replace with actual data from your API
-  const [appliedProjects] = useState<AppliedProject[]>([
+  const [appliedProjects] = useState<Project[]>([
     {
       id: "1",
       title: "프로젝트 제목입니다",
@@ -90,7 +91,7 @@ export function MyPageView() {
   );
 
   // mock "내 프로젝트" list (replace with real data)
-  const [ownedProjects] = useState<AppliedProject[]>([
+  const [ownedProjects] = useState<Project[]>([
     {
       id: "o1",
       title: "내 프로젝트 A",
@@ -99,6 +100,7 @@ export function MyPageView() {
       appliedDate: "2025. 10. 01",
       deadline: "2025. 12. 01",
       positions: ["Frontend"],
+      applicationCount: 5,
     },
     {
       id: "o2",
@@ -108,6 +110,7 @@ export function MyPageView() {
       appliedDate: "2025. 09. 15",
       deadline: "2025. 11. 30",
       positions: ["Backend", "AI"],
+      applicationCount: 3,
     },
   ]);
 

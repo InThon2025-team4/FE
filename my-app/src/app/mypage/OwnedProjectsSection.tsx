@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -8,10 +9,10 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { AppliedProject } from "./MyPageView";
+import type { Project } from "./MyPageView";
 
-interface AppliedProjectsSectionProps {
-  projects: AppliedProject[];
+interface OwnedProjectsSectionProps {
+  projects: Project[];
 }
 
 const statusConfig = {
@@ -29,9 +30,9 @@ const statusConfig = {
   },
 };
 
-export function OwnedProjectsSection({
-  projects,
-}: AppliedProjectsSectionProps) {
+export function OwnedProjectsSection({ projects }: OwnedProjectsSectionProps) {
+  const router = useRouter();
+
   if (projects.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -56,13 +57,17 @@ export function OwnedProjectsSection({
                 <CardTitle className="text-lg font-semibold line-clamp-2">
                   {project.title}
                 </CardTitle>
-                <Badge
-                  className={`${
-                    statusConfig[project.status].color
-                  } shrink-0 border-0`}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/applicantList/${project.id}`);
+                  }}
+                  className="relative z-10 text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium cursor-pointer"
                 >
-                  {statusConfig[project.status].label}
-                </Badge>
+                  신청 인원 {project.applicationCount}
+                </button>
               </div>
 
               <CardDescription className="text-sm text-zinc-500 line-clamp-2">
