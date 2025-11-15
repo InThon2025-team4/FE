@@ -1,0 +1,186 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+export function ViewProject() {
+  // Mock data - replace with actual data from props or API
+  const projectData = {
+    title: "프로젝트 제목입니다",
+    status: "모집 중",
+    author: {
+      name: "사용자 이름",
+      avatar: null,
+      initials: "CN",
+    },
+    createdAt: "2025. 11. 14",
+    startDate: "2025. 11. 29",
+    deadline: "2025. 11. 20",
+    positions: {
+      frontend: "마감",
+      backend: "2 명",
+      ai: "1 명",
+      mobile: "마감",
+    },
+    duration: "1 개월",
+    difficulty: "높음",
+    description: "",
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="h-16 border-b border-[#E5E5E5] flex items-center justify-center">
+        <div className="w-full max-w-[1440px] px-6 flex items-center justify-between">
+          {/* Logo Section */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded border-2 border-[#DC143C]" />
+            <h1 className="text-base font-semibold text-[#0A0A0A]">
+              Service Name
+            </h1>
+          </div>
+
+          {/* User Avatar */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center">
+              <span className="text-sm font-medium text-white">
+                {projectData.author.initials}
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="w-full max-w-[1156px] mx-auto px-[142px] py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
+        {/* Title and Status Section */}
+        <div className="w-full flex flex-col items-center gap-[15px] pt-[66px]">
+          {/* Title Row */}
+          <div className="w-full flex items-center justify-center gap-1.5">
+            <div className="flex-1 flex flex-col justify-center gap-[15px]">
+              <h2 className="text-5xl font-semibold text-black leading-[1em] tracking-[-0.01em]">
+                {projectData.title}
+              </h2>
+            </div>
+            <div className="px-[18px]">
+              <Badge className="bg-[#488FE1] hover:bg-[#488FE1]/90 text-white text-sm font-medium px-6 py-2.5 rounded-full border-0">
+                {projectData.status}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Author and Date Section */}
+          <div className="w-full flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0">
+              <span className="text-sm font-medium text-white">
+                {projectData.author.initials}
+              </span>
+            </div>
+            <span className="text-base font-medium text-[#0A0A0A]">
+              {projectData.author.name}
+            </span>
+            <div className="w-[9px] h-[22px] border-l border-[#D9D9D9]" />
+            <span className="text-base font-medium text-[#505050] w-[95px]">
+              {projectData.createdAt}
+            </span>
+          </div>
+
+          {/* Divider */}
+          <div className="w-full h-5 border-t border-[#E5E5E5]" />
+        </div>
+
+        {/* Project Details Section */}
+        <div className="w-full h-[242px] flex flex-col items-center gap-6 px-[184px] py-6">
+          {/* Row 1: Dates */}
+          <div className="w-full flex items-center justify-between gap-6">
+            <ProjectDetailItem
+              label="시작 예정"
+              value={projectData.startDate}
+            />
+            <ProjectDetailItem label="모집 마감" value={projectData.deadline} />
+          </div>
+
+          {/* Row 2: Positions */}
+          <div className="w-full flex items-center justify-between gap-6">
+            <ProjectDetailItem
+              label="프론트엔드"
+              value={projectData.positions.frontend}
+            />
+            <ProjectDetailItem
+              label="백엔드"
+              value={projectData.positions.backend}
+            />
+          </div>
+
+          {/* Row 3: More Positions */}
+          <div className="w-full flex items-center justify-between gap-6">
+            <ProjectDetailItem
+              label="인공지능"
+              value={projectData.positions.ai}
+            />
+            <ProjectDetailItem
+              label="모바일"
+              value={projectData.positions.mobile}
+            />
+          </div>
+
+          {/* Row 4: Duration and Difficulty */}
+          <div className="w-full flex items-center justify-between gap-6">
+            <ProjectDetailItem label="예상 기간" value={projectData.duration} />
+            <div className="w-[235px] h-[29px] flex items-center gap-[46px]">
+              <span className="w-[105px] text-base font-medium text-[#505050]">
+                난이도
+              </span>
+              <Badge className="bg-[#DC2626] hover:bg-[#DC2626]/90 text-white text-xs font-medium px-2 py-0.5 rounded-full border-0">
+                {projectData.difficulty}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Apply Button Section */}
+        <div className="w-full flex flex-col items-end gap-2.5 px-[45px]">
+          <Button className="bg-[#771F21] hover:bg-[#771F21]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg">
+            지원하기
+          </Button>
+        </div>
+
+        {/* Project Description Section */}
+        <div className="w-full h-[283px] flex flex-col gap-2.5 py-6">
+          {/* Section Title */}
+          <div className="w-full flex items-center gap-2.5 px-6">
+            <h3 className="text-xl font-semibold text-black tracking-[-0.02em] leading-[1.2em]">
+              프로젝트 설명
+            </h3>
+          </div>
+
+          {/* Description Card */}
+          <div className="w-full h-[226px] flex flex-col items-stretch justify-stretch gap-4 px-6">
+            <Card className="flex-1 bg-[#F5F5F5] rounded-xl flex flex-col items-center p-6 border-0">
+              {/* Add project description content here */}
+              <div className="text-sm text-[#505050]">
+                {projectData.description ||
+                  "프로젝트 설명이 여기에 표시됩니다."}
+              </div>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Helper Component for Project Details
+function ProjectDetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="w-[235px] h-[29px] flex items-center">
+      <span className="w-[105px] text-base font-medium text-[#505050]">
+        {label}
+      </span>
+      <span className="flex-1 text-base font-semibold text-[#0A0A0A] text-center">
+        {value}
+      </span>
+    </div>
+  );
+}
