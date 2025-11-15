@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import {
   Tags,
   TagsContent,
@@ -17,8 +17,21 @@ type Tag = {
   id: string;
   label: string;
 };
-export function TagDropDown({ defaultTags }: { defaultTags: Tag[] }) {
-  const [selected, setSelected] = useState<string[]>([]);
+
+type Props = {
+  defaultTags: Tag[];
+  selected?: string[];
+  setSelected?: Dispatch<SetStateAction<string[]>>;
+};
+
+export function TagDropDown({
+  defaultTags,
+  selected: selectedProp,
+  setSelected: setSelectedProp,
+}: Props) {
+  const [internalSelected, setInternalSelected] = useState<string[]>([]);
+  const selected = selectedProp ?? internalSelected;
+  const setSelected = setSelectedProp ?? setInternalSelected;
   const [newTag, setNewTag] = useState<string>("");
   const [tags, setTags] =
     useState<{ id: string; label: string }[]>(defaultTags);
