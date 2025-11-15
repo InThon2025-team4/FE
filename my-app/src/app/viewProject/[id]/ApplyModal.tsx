@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import axios from "axios";
+import { applyToProject } from "@/lib/api/projects";
 
 interface ApplyModalProps {
   open: boolean;
@@ -52,14 +52,16 @@ export function ApplyModal({
     setLoading(true);
 
     try {
-      const serverUrl = process.env.NEXT_PUBLIC_SERVER_EXCHANGE_URL;
-
       // Call backend API to create application
-      await axios.post(`${serverUrl}/api/applications`, {
-        projectId,
+      const result = await applyToProject(projectId, {
         position: selectedPosition,
         introduction: introduction.trim(),
       });
+
+      if (!result.success) {
+        alert(result.message || "지원 중 오류가 발생했습니다.");
+        return;
+      }
 
       // Close the apply modal
       onOpenChange(false);

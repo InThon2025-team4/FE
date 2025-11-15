@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { TagDropDown } from "../signup/tagDropDown";
+import { TagDropDown } from "../onBoarding/tagDropDown";
 import type { UserProfile } from "./MyPageView";
 
 interface EditProfileDialogProps {
