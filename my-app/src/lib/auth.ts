@@ -1,4 +1,10 @@
 import axios from "axios";
+import {
+  supabaseSignIn,
+  supabaseSignOut,
+  getSupabaseUser,
+  getSupabaseSession,
+} from "./supabaseClient";
 import { supabase } from "./supabase";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -137,7 +143,7 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
           "고려대학교 이메일 주소(korea.ac.kr 또는 korea.edu)를 입력해주세요.",
       };
     }
-    // Create auth user
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -159,72 +165,28 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
       };
     }
 
-    // Case 1: User exists but is not confirmed
     if (authData.user && !authData.session) {
       return {
         success: true,
         message: "가입 확인을 위해 이메일을 확인해주세요.",
-        user: authData.user,
+        user: authData.user as unknown as User | undefined,
       };
     }
 
-    // Case 2: User is created and session is active
     if (authData.user && authData.session) {
-      // Create profile entry
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: authData.user.id,
-          email,
-          name,
-          tech_stack: techStack,
-          position,
-          portfolio,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-
-      if (profileError) {
-        console.warn("Profile creation warning:", profileError.message);
-        // Depending on the app's logic, you might want to return an error here
-      }
-
-      // Get AccessToken from your backend
-      try {
-        const supabaseAccessToken = authData.session.access_token;
-        const response = await axios.post("/auth/supabase/", {
-          accessToken: supabaseAccessToken,
-        });
-
-        if (response.data.access_token) {
-          localStorage.setItem("accessToken", response.data.access_token);
-          return {
-            success: true,
-            message: "회원가입이 완료되었습니다. 이메일을 확인해주세요.",
-            user: authData.user,
-            session: authData.session,
-          };
-        } else {
-          throw new Error("백엔드로부터 AccessToken을 받지 못했습니다.");
-        }
-      } catch (apiError) {
-        const errorMessage =
-          apiError instanceof Error
-            ? apiError.message
-            : "API 서버와 통신 중 오류가 발생했습니다.";
-        return {
-          success: false,
-          message: errorMessage,
-          error: apiError,
-        };
-      }
+      return {
+        success: true,
+        message: "회원가입 성공! 온보딩을 진행해주세요.",
+        onboardingRequired: true,
+        supabaseUid: authData.user.id,
+        email: authData.user.email,
+        token: authData.session.access_token,
+      };
     }
 
-    // Case 3: Unexpected response from Supabase
     return {
-      success: true,
-      message: "회원가입이 완료되었습니다. 이메일을 확인해주세요.",
-      user: authData.user as unknown as User | undefined,
-      session: authData.session,
+      success: false,
+      message: "알 수 없는 오류가 발생했습니다.",
     };
   } catch (error) {
     const errorMessage =
@@ -255,12 +217,10 @@ export async function signInWithSupabase(
   try {
     const { email, password } = data;
 
-    // Step 1: Get accessToken from Supabase
-    const { data: authData, error: authError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data: authData, error: authError } = await supabaseSignIn({
+      email,
+      password,
+    });
 
     if (authError) {
       return {
@@ -278,52 +238,53 @@ export async function signInWithSupabase(
       };
     }
 
-    // Step 2: Send accessToken to backend
-    const response = await fetch(`${API_BASE_URL}/auth/supabase`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        accessToken: authData.session.access_token,
-      }),
-    });
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/supabase`,
+        {
+          accessToken: authData.session.access_token,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const beResponse = response.data;
+
+      if (beResponse.onboardingRequired) {
+        return {
+          success: false,
+          message: "온보딩이 필요합니다.",
+          onboardingRequired: true,
+          supabaseUid: beResponse.supabaseUid,
+          email: beResponse.email,
+          token: authData.session.access_token,
+          error: null,
+        };
+      }
+
+      if (beResponse.token) {
+        storeToken(beResponse.token);
+      }
+
+      return {
+        success: true,
+        message: "로그인 성공!",
+        token: beResponse.token,
+        user: beResponse.user,
+        error: null,
+      };
+    } catch (error) {
+      const axiosError = error as any;
+      const errorData = axiosError.response?.data || {};
       return {
         success: false,
         message: errorData.message || "백엔드 인증 실패",
         error: errorData,
       };
     }
-
-    const beResponse = await response.json();
-
-    // Step 3: Check if onboarding is required
-    if (beResponse.onboardingRequired) {
-      return {
-        success: false,
-        message: "온보딩이 필요합니다.",
-        onboardingRequired: true,
-        supabaseUid: beResponse.supabaseUid,
-        email: beResponse.email,
-        error: null,
-      };
-    }
-
-    // Step 4: Store JWT token and return success
-    if (beResponse.token) {
-      storeToken(beResponse.token);
-    }
-
-    return {
-      success: true,
-      message: "로그인 성공!",
-      token: beResponse.token,
-      user: beResponse.user,
-      error: null,
-    };
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
@@ -347,33 +308,25 @@ export async function signInWithSupabase(
  * 3. Store JWT token for future authenticated requests
  */
 export async function completeOnboarding(
-  accessToken: string,
+  supabaseAccessToken: string,
   onboardingData: OnboardingData
 ): Promise<AuthResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/onboard`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        accessToken,
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/onboard`,
+      {
+        accessToken: supabaseAccessToken,
         ...onboardingData,
-      }),
-    });
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return {
-        success: false,
-        message: errorData.message || "온보딩 실패",
-        error: errorData,
-      };
-    }
+    const beResponse = response.data;
 
-    const beResponse = await response.json();
-
-    // Store JWT token
     if (beResponse.token) {
       storeToken(beResponse.token);
     }
@@ -386,14 +339,12 @@ export async function completeOnboarding(
       error: null,
     };
   } catch (error) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "온보딩 중 오류가 발생했습니다.";
+    const axiosError = error as any;
+    const errorData = axiosError.response?.data || {};
     return {
       success: false,
-      message: errorMessage,
-      error,
+      message: errorData.message || "온보딩 실패",
+      error: errorData,
     };
   }
 }
@@ -403,7 +354,7 @@ export async function completeOnboarding(
  */
 export async function signOut(): Promise<AuthResponse> {
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseSignOut();
     clearToken();
 
     if (error) {
@@ -413,9 +364,6 @@ export async function signOut(): Promise<AuthResponse> {
         error,
       };
     }
-
-    // Remove the accessToken from localStorage
-    localStorage.removeItem("accessToken");
 
     return {
       success: true,
@@ -442,7 +390,7 @@ export async function getCurrentUser() {
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser();
+    } = await getSupabaseUser();
 
     if (error) {
       return { user: null, error };
@@ -462,7 +410,7 @@ export async function getSession() {
     const {
       data: { session },
       error,
-    } = await supabase.auth.getSession();
+    } = await getSupabaseSession();
 
     if (error) {
       return { session: null, error };
