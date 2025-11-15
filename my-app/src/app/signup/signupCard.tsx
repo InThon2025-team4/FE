@@ -64,7 +64,7 @@ export function SignupCard({
           </DialogHeader>
         </DialogContent>
       </Dialog>
-      <Card className="w-full max-w-sm border-none shadow-none">
+      <Card className="w-full max-w-sm border-none shadow-none ">
         <CardHeader className="text-center">
           <CardTitle>Signup</CardTitle>
           <CardDescription>make your account</CardDescription>

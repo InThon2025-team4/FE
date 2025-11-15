@@ -22,12 +22,14 @@ type Props = {
   defaultTags: Tag[];
   selected?: string[];
   setSelected?: Dispatch<SetStateAction<string[]>>;
+  placeholder: string;
 };
 
 export function TagDropDown({
   defaultTags,
   selected: selectedProp,
   setSelected: setSelectedProp,
+  placeholder,
 }: Props) {
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
   const selected = selectedProp ?? internalSelected;
@@ -64,8 +66,8 @@ export function TagDropDown({
     setNewTag("");
   };
   return (
-    <Tags className="max-w-[300px]">
-      <TagsTrigger>
+    <Tags>
+      <TagsTrigger placeholder={placeholder}>
         {selected.map((tag) => (
           <TagsValue key={tag} onRemove={() => handleRemove(tag)}>
             {tags.find((t) => t.id === tag)?.label}
@@ -73,7 +75,7 @@ export function TagDropDown({
         ))}
       </TagsTrigger>
       <TagsContent>
-        <TagsInput onValueChange={setNewTag} placeholder="Search tag..." />
+        <TagsInput onValueChange={setNewTag} />
         <TagsList>
           <TagsEmpty>
             <button

@@ -48,8 +48,7 @@ const positionTags = [
 export function UserInfoCard() {
   const [techStack, setTechStack] = useState<string[]>([]);
   const [position, setPosition] = useState<string[]>([]);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [portfolio, setPortfolio] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
@@ -74,10 +73,14 @@ export function UserInfoCard() {
           <form>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2 items-center">
+                <div className="flex items-center">
+                  <Label htmlFor="password">기술 스택</Label>
+                </div>
                 <TagDropDown
                   defaultTags={techStackTags}
                   selected={techStack}
                   setSelected={setTechStack}
+                  placeholder="프레임워크를 선택하세요"
                 ></TagDropDown>
               </div>
               <div className="grid gap-2">
@@ -88,18 +91,19 @@ export function UserInfoCard() {
                   defaultTags={positionTags}
                   selected={position}
                   setSelected={setPosition}
+                  placeholder="포지션을선택하세요"
                 ></TagDropDown>
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">이름</Label>
+                  <Label htmlFor="password">포트폴리오 링크 (선택)</Label>
                 </div>
                 <Input
-                  id="confirmPassword"
-                  type="password"
+                  id="portfolio"
                   required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={portfolio}
+                  placeholder="https://example.com"
+                  onChange={(e) => setPortfolio(e.target.value)}
                 />
               </div>
             </div>
