@@ -74,7 +74,9 @@ export function SignupCard({
         // Redirect to onboarding after showing success message
         setTimeout(() => {
           if (result.user?.id) {
-            router.push(`/onboarding?supabaseUid=${result.user.id}&email=${email}`);
+            router.push(
+              `/onBoarding?supabaseUid=${result.user.id}&email=${email}`
+            );
           } else {
             setProgress(100);
           }
