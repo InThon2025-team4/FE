@@ -90,9 +90,9 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
 
       // Get AccessToken from your backend
       try {
-        const idToken = authData.session.access_token;
+        const supabaseAccessToken = authData.session.access_token;
         const response = await axios.post("/auth/supabase/", {
-          id_token: idToken,
+          accessToken: supabaseAccessToken,
         });
 
         if (response.data.access_token) {
@@ -161,9 +161,9 @@ export async function signIn(data: SignInData): Promise<AuthResponse> {
     if (authData.user && authData.session) {
       // Get AccessToken from your backend
       try {
-        const idToken = authData.session.access_token;
+        const supabaseAccessToken = authData.session.access_token;
         const response = await axios.post("/auth/supabase/", {
-          id_token: idToken,
+          accessToken: supabaseAccessToken,
         });
 
         if (response.data.access_token) {
