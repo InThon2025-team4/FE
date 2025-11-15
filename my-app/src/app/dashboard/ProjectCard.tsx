@@ -20,13 +20,13 @@ export function ProjectCard({
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "쉬움":
-        return "bg-[#4CAF50] text-white";
+        return "bg-[#6CDF44] text-white";
       case "보통":
-        return "bg-[#E1B848] text-white";
+        return "bg-[#CC9D32] text-white";
       case "어려움":
-        return "bg-[#DC143C] text-white";
+        return "bg-[#DC2626] text-white";
       default:
-        return "bg-[#E1B848] text-white";
+        return "bg-[#CC9D32] text-white";
     }
   };
 
@@ -60,14 +60,33 @@ export function ProjectCard({
       <div className="flex flex-col justify-center gap-1.5">
         {/* Position Badges */}
         <div className="flex items-center gap-3.5 w-[291.33px] h-6">
-          {positions.map((position, index) => (
-            <Badge
-              key={index}
-              className="bg-[#771F21] hover:bg-[#771F21]/90 text-[#FAFAFA] rounded px-2 py-0.5 text-xs font-medium"
-            >
-              {position}
-            </Badge>
-          ))}
+          {positions.map((position, index) => {
+            const getPositionColor = (pos: string) => {
+              switch (pos) {
+                case "프론트엔드":
+                  return "bg-[#0673D3] hover:bg-[#0673D3]/90";
+                case "백엔드":
+                  return "bg-[#EBB332] hover:bg-[#EBB332]/90";
+                case "모바일":
+                  return "bg-[#041F9B] hover:bg-[#041F9B]/90";
+                case "AI":
+                  return "bg-[#771F21] hover:bg-[#771F21]/90";
+                default:
+                  return "bg-[#771F21] hover:bg-[#771F21]/90";
+              }
+            };
+
+            return (
+              <Badge
+                key={index}
+                className={`${getPositionColor(
+                  position
+                )} text-[#FAFAFA] rounded px-2 py-0.5 text-xs font-medium`}
+              >
+                {position}
+              </Badge>
+            );
+          })}
         </div>
 
         {/* Deadline */}

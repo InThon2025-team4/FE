@@ -13,9 +13,7 @@ export function Header({ userInitials = "CN", showUser = true }: HeaderProps) {
         <Link href="/dashboard">
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded border-2 border-[#DC143C]" />
-            <h1 className="text-base font-semibold text-[#0A0A0A]">
-              Service Name
-            </h1>
+            <h1 className="text-base font-bold text-[#0A0A0A]">KUGit</h1>
           </div>
         </Link>
 

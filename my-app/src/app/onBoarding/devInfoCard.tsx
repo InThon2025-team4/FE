@@ -94,9 +94,9 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
         </DialogContent>
       </Dialog>
       <Card className="w-full max-w-sm border-none shadow-none">
-        <CardHeader className="text-center">
-          <CardTitle>Signup</CardTitle>
-          <CardDescription>make your account</CardDescription>
+        <CardHeader className="text-left">
+          <CardTitle>프로필 정보 입력</CardTitle>
+          <CardDescription>팀 매칭을 위한 정보를 입력하세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -119,15 +119,16 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">포트폴리오 링크 (선택)</Label>
+                  <Label htmlFor="portfolio">포트폴리오 링크 (선택)</Label>
                 </div>
                 <Input
                   id="portfolio"
-                  required
-                  value={portfolio}
+                  type="text"
                   placeholder="https://example.com"
+                  value={portfolio}
                   onChange={(e) => setPortfolio(e.target.value)}
                 />
               </div>
@@ -137,7 +138,7 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
         <CardFooter className="flex-col gap-2">
           <Button
             type="button"
-            className="w-full"
+            className="w-full bg-[var(--color-red)]"
             onClick={handleSubmit}
             disabled={loading}
           >

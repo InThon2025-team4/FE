@@ -22,11 +22,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUp, signInWithGoogle } from "@/lib/auth";
 
-export function SignupCard({
-  setProgress,
-}: {
-  setProgress: (value: number) => void;
-}) {
+export function SignupCard() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,11 +69,7 @@ export function SignupCard({
 
         // Redirect to onboarding after showing success message
         setTimeout(() => {
-          if (result.user?.id) {
-            router.push(`/onboarding?supabaseUid=${result.user.id}&email=${email}`);
-          } else {
-            setProgress(100);
-          }
+          router.push(`/onBoarding?email=${email}`);
         }, 1500);
       } else {
         setPopupTitle("오류");
@@ -125,9 +117,9 @@ export function SignupCard({
         </DialogContent>
       </Dialog>
       <Card className="w-full max-w-sm border-none shadow-none ">
-        <CardHeader className="text-center">
-          <CardTitle>Signup</CardTitle>
-          <CardDescription>make your account</CardDescription>
+        <CardHeader className="text-left">
+          <CardTitle>회원가입</CardTitle>
+          <CardDescription>기본 정보를 입력하세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -186,20 +178,11 @@ export function SignupCard({
         <CardFooter className="flex-col gap-2">
           <Button
             type="button"
-            className="w-full"
+            className="w-full bg-[var(--color-red)]"
             onClick={handleSignUp}
             disabled={loading}
           >
-            {loading ? "처리 중..." : "Signup"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleSignup}
-            disabled={loading}
-          >
-            Signup with Google
+            {loading ? "처리 중..." : "회원가입"}
           </Button>
         </CardFooter>
       </Card>

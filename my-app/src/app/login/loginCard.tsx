@@ -49,7 +49,9 @@ export function LoginCard() {
         setDialogOpen(true);
 
         setTimeout(() => {
-          router.push(`/onboarding?supabaseUid=${result.supabaseUid}&email=${result.email}`);
+          router.push(
+            `/onboarding?supabaseUid=${result.supabaseUid}&email=${result.email}`
+          );
         }, 1500);
       } else if (result.success) {
         // Existing user - login successful
@@ -70,25 +72,6 @@ export function LoginCard() {
       console.error("Login error:", err);
       setDialogTitle("오류");
       setDialogMessage("로그인 중 문제가 발생했습니다.");
-      setDialogOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    try {
-      const result = await signInWithGoogle();
-      if (!result.success) {
-        setDialogTitle("오류");
-        setDialogMessage(result.message || "Google 로그인에 실패했습니다.");
-        setDialogOpen(true);
-      }
-    } catch (err) {
-      console.error("Google login error:", err);
-      setDialogTitle("오류");
-      setDialogMessage("Google 로그인 중 문제가 발생했습니다.");
       setDialogOpen(true);
     } finally {
       setLoading(false);
@@ -137,7 +120,7 @@ export function LoginCard() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="m@example.com"
+                    placeholder="example@korea.ac.kr"
                     className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs focus-visible:ring-0 focus-visible:ring-offset-0"
                     required
                     disabled={loading}
@@ -173,35 +156,12 @@ export function LoginCard() {
                   >
                     {loading ? "로그인 중..." : "로그인"}
                   </Button>
-
-                  {/* Divider with Text */}
-                  <div className="flex items-center w-full">
-                    <div className="flex-1 h-px border-t border-[#E5E5E5]" />
-                    <div className="px-2">
-                      <span className="text-xs text-[#737373]">
-                        OR CONTINUE WITH
-                      </span>
-                    </div>
-                    <div className="flex-1 h-px border-t border-[#E5E5E5]" />
-                  </div>
-
-                  {/* Google Login Button */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleGoogleLogin}
-                    className="w-full h-9 bg-white border border-[#E5E5E5] text-[#0A0A0A] text-sm font-medium rounded-lg shadow-xs hover:bg-white/90"
-                    disabled={loading}
-                  >
-                    Google로 로그인하기
-                  </Button>
                 </div>
-
                 {/* Signup Link */}
                 <div className="flex items-center justify-stretch pt-4">
                   <Link
                     href="/signup"
-                    className="flex-1 text-sm text-[#737373] text-center hover:underline"
+                    className="flex-1 text-sm text-blue-600 text-center underline hover:underline"
                   >
                     계정이 없으신가요? 간편하게 회원가입하세요!
                   </Link>
