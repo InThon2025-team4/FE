@@ -8,17 +8,15 @@ import { useState } from "react";
 
 export default function OnBoardingPage() {
   const [step, setStep] = useState<"user" | "dev">("user");
-  const [progress, setProgress] = useState(50);
+  const [progress, setProgress] = useState(75);
   const [userInfo, setUserInfo] = useState({
     techStack: [] as string[],
     position: [] as string[],
-    portfolio: "",
   });
 
   const handleUserInfoNext = (data: {
     techStack: string[];
     position: string[];
-    portfolio: string;
   }) => {
     setUserInfo(data);
     setStep("dev");

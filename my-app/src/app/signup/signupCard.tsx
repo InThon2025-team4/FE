@@ -22,11 +22,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUp, signInWithGoogle } from "@/lib/auth";
 
-export function SignupCard({
-  setProgress,
-}: {
-  setProgress: (value: number) => void;
-}) {
+export function SignupCard() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,8 +73,6 @@ export function SignupCard({
             router.push(
               `/onBoarding?supabaseUid=${result.user.id}&email=${email}`
             );
-          } else {
-            setProgress(100);
           }
         }, 1500);
       } else {

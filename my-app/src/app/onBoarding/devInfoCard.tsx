@@ -34,7 +34,6 @@ interface DevInfoCardProps {
   userInfo: {
     techStack: string[];
     position: string[];
-    portfolio: string;
   };
 }
 
@@ -58,7 +57,7 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
       const onboardingData = {
         techStack: userInfo.techStack,
         position: userInfo.position,
-        portfolio: userInfo.portfolio || undefined,
+        portfolio: portfolio === "" ? undefined : portfolio,
         proficiency: parseInt(proficiency),
       };
 
