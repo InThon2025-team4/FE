@@ -9,12 +9,7 @@ export default function SignUpPage() {
   const [progress, setProgress] = useState(100);
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6">
-      <div className="w-full border-b flex items-center justify-center py-6">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Create your account
-        </h1>
-      </div>
-      <Card className="w-[30%] min-w-[300px] h-[60%] items-center">
+      <Card className="w-full max-w-sm flex items-center">
         <Progress value={progress} className="w-[60%]" />
         {progress == 50 && <SignupCard setProgress={setProgress}></SignupCard>}
         {progress == 100 && <UserInfoCard></UserInfoCard>}

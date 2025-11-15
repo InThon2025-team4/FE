@@ -53,13 +53,16 @@ export function ViewProject() {
       </header>
 
       {/* Main Content */}
-      <main className="w-full max-w-[1156px] mx-auto px-[142px] py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
+      <main className="w-full max-w-[1156px] mx-auto px-[20px] py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
         {/* Title and Status Section */}
         <div className="w-full flex flex-col items-center gap-[15px] pt-[66px]">
           {/* Title Row */}
           <div className="w-full flex items-center justify-center gap-1.5">
             <div className="flex-1 flex flex-col justify-center gap-[15px]">
-              <h2 className="text-5xl font-semibold text-black leading-[1em] tracking-[-0.01em]">
+              <h2
+                className=" text-1xl sm:text-3xl md:text-5xl lg:text-5xl
+  font-semibold text-black leading-[1em] tracking-[-0.01em]"
+              >
                 {projectData.title}
               </h2>
             </div>
@@ -81,7 +84,7 @@ export function ViewProject() {
               {projectData.author.name}
             </span>
             <div className="w-[9px] h-[22px] border-l border-[#D9D9D9]" />
-            <span className="text-base font-medium text-[#505050] w-[95px]">
+            <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#505050] w-[100px]">
               {projectData.createdAt}
             </span>
           </div>
@@ -91,9 +94,9 @@ export function ViewProject() {
         </div>
 
         {/* Project Details Section */}
-        <div className="w-full h-[242px] flex flex-col items-center gap-6 px-[184px] py-6">
+        <div className="w-[70%] h-[242px] flex flex-col items-center gap-6 py-6">
           {/* Row 1: Dates */}
-          <div className="w-full flex items-center justify-between gap-6">
+          <div className="w-full flex items-center justify-around gap-6">
             <ProjectDetailItem
               label="시작 예정"
               value={projectData.startDate}
@@ -102,7 +105,7 @@ export function ViewProject() {
           </div>
 
           {/* Row 2: Positions */}
-          <div className="w-full flex items-center justify-between gap-6">
+          <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="프론트엔드"
               value={projectData.positions.frontend}
@@ -114,7 +117,7 @@ export function ViewProject() {
           </div>
 
           {/* Row 3: More Positions */}
-          <div className="w-full flex items-center justify-between gap-6">
+          <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="인공지능"
               value={projectData.positions.ai}
@@ -126,13 +129,13 @@ export function ViewProject() {
           </div>
 
           {/* Row 4: Duration and Difficulty */}
-          <div className="w-full flex items-center justify-between gap-6">
+          <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem label="예상 기간" value={projectData.duration} />
-            <div className="w-[235px] h-[29px] flex items-center gap-[46px]">
-              <span className="w-[105px] text-base font-medium text-[#505050]">
+            <div className="w-[235px] h-[29px] flex items-center gap-2">
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#505050] w-[100px]">
                 난이도
               </span>
-              <Badge className="bg-[#DC2626] hover:bg-[#DC2626]/90 text-white text-xs font-medium px-2 py-0.5 rounded-full border-0">
+              <Badge className="bg-[#DC2626] hover:bg-[#DC2626]/90 text-white text-xs font-medium px-3 py-1 rounded-full border-0">
                 {projectData.difficulty}
               </Badge>
             </div>
@@ -174,11 +177,11 @@ export function ViewProject() {
 // Helper Component for Project Details
 function ProjectDetailItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="w-[235px] h-[29px] flex items-center">
-      <span className="w-[105px] text-base font-medium text-[#505050]">
+    <div className="w-[235px] h-[29px] flex items-center gap-2.5">
+      <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#505050] w-[100px]">
         {label}
       </span>
-      <span className="flex-1 text-base font-semibold text-[#0A0A0A] text-center">
+      <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#0A0A0A] w-[100px]">
         {value}
       </span>
     </div>

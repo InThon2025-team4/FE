@@ -8,7 +8,7 @@ import {
 
 export function ProjectCard() {
   return (
-    <Link href="/project/detail" className="block">
+    <Link href="/project" className="block">
       <Card
         className="
           w-[260px] 
