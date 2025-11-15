@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { signInWithSupabase, signInWithGoogle } from "@/lib/auth";
+import { signInWithSupabase } from "@/lib/auth";
 
 export function LoginCard() {
   const router = useRouter();
