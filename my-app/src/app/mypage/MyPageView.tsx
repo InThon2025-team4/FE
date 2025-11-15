@@ -27,7 +27,7 @@ export interface Project {
   title: string;
   description: string;
   status: "pending" | "accepted" | "rejected";
-  appliedDate: string;
+  createdDate: string;
   deadline: string;
   positions: string[];
   applicationCount?: number;
@@ -42,7 +42,6 @@ export function MyPageView() {
     techStack: ["React", "TypeScript", "Next.js"],
     position: ["FE"],
     portfolio: "https://portfolio.example.com",
-    bio: "안녕하세요. 프론트엔드 개발자입니다.",
   });
 
   // Mock applied projects - replace with actual data from your API
@@ -52,7 +51,7 @@ export function MyPageView() {
       title: "프로젝트 제목입니다",
       description: "프로젝트 설명이 여기에 표시됩니다.",
       status: "pending",
-      appliedDate: "2025. 11. 14",
+      createdDate: "2025. 11. 14",
       deadline: "2025. 11. 20",
       positions: ["Frontend", "Backend"],
     },
@@ -61,7 +60,7 @@ export function MyPageView() {
       title: "두 번째 프로젝트",
       description: "두 번째 프로젝트 설명입니다.",
       status: "accepted",
-      appliedDate: "2025. 11. 10",
+      createdDate: "2025. 11. 10",
       deadline: "2025. 11. 15",
       positions: ["Frontend"],
     },
@@ -70,7 +69,7 @@ export function MyPageView() {
       title: "세 번째 프로젝트",
       description: "세 번째 프로젝트 설명입니다.",
       status: "rejected",
-      appliedDate: "2025. 11. 05",
+      createdDate: "2025. 11. 05",
       deadline: "2025. 11. 12",
       positions: ["Backend", "AI"],
     },
@@ -79,7 +78,7 @@ export function MyPageView() {
       title: "세 번째 프로젝트",
       description: "세 번째 프로젝트 설명입니다.",
       status: "rejected",
-      appliedDate: "2025. 11. 05",
+      createdDate: "2025. 11. 05",
       deadline: "2025. 11. 12",
       positions: ["Backend", "AI"],
     },
@@ -97,7 +96,7 @@ export function MyPageView() {
       title: "내 프로젝트 A",
       description: "내가 만든 프로젝트 A 설명",
       status: "accepted",
-      appliedDate: "2025. 10. 01",
+      createdDate: "2025. 10. 01",
       deadline: "2025. 12. 01",
       positions: ["Frontend"],
       applicationCount: 5,
@@ -107,7 +106,7 @@ export function MyPageView() {
       title: "내 프로젝트 B",
       description: "내가 만든 프로젝트 B 설명",
       status: "pending",
-      appliedDate: "2025. 09. 15",
+      createdDate: "2025. 09. 15",
       deadline: "2025. 11. 30",
       positions: ["Backend", "AI"],
       applicationCount: 3,

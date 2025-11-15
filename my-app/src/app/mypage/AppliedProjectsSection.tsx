@@ -72,9 +72,9 @@ export function AppliedProjectsSection({
               {/* Project Details */}
               <div className="flex flex-col gap-2 pt-2 border-t">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#505050]">지원일</span>
+                  <span className="text-[#505050]">생성일</span>
                   <span className="text-[#0A0A0A] font-medium">
-                    {project.appliedDate}
+                    {project.createdDate}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">

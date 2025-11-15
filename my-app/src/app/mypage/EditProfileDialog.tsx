@@ -63,7 +63,7 @@ export function EditProfileDialog({
     const updatedProfile: UserProfile = {
       ...profile,
       name,
-      bio,
+
       portfolio,
       techStack,
       position,
@@ -75,7 +75,6 @@ export function EditProfileDialog({
     if (!newOpen) {
       // Reset form on close
       setName(profile.name);
-      setBio(profile.bio || "");
       setPortfolio(profile.portfolio || "");
       setTechStack(profile.techStack);
       setPosition(profile.position);
@@ -102,18 +101,6 @@ export function EditProfileDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="이름을 입력하세요"
-            />
-          </div>
-
-          {/* Bio */}
-          <div className="grid gap-2">
-            <Label htmlFor="bio">자기소개</Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="자기소개를 입력하세요"
-              rows={4}
             />
           </div>
 
