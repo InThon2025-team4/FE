@@ -1,11 +1,13 @@
 import axios from "axios";
 import {
+  supabaseSignUp,
   supabaseSignIn,
   supabaseSignOut,
   getSupabaseUser,
   getSupabaseSession,
+  resetPasswordEmail,
+  updateUserPassword,
 } from "./supabaseClient";
-import { supabase } from "./supabase";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -131,10 +133,17 @@ export async function authenticatedFetch(
 
 /**
  * Sign up a new user with email and password (Supabase)
+ * 
+ * Flow:
+ * 1. Validate email (must be korea.ac.kr or korea.edu)
+ * 2. Send sign up request to Supabase with email redirect callback to /auth/callback
+ * 3. User receives confirmation email
+ * 4. User clicks confirmation link -> redirects to /auth/callback
+ * 5. /auth/callback handles token processing and backend communication
  */
 export async function signUp(data: SignUpData): Promise<AuthResponse> {
   try {
-    const { email, password, name, techStack, position, portfolio } = data;
+    const { email, password } = data;
 
     if (!/^[^\s@]+@korea\.(ac\.kr|edu)$/.test(email.trim())) {
       return {
@@ -144,18 +153,9 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
       };
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          tech_stack: techStack,
-          position,
-          portfolio,
-        },
-      },
-    });
+    // supabaseClient의 supabaseSignUp 함수 사용
+    // emailRedirectTo가 자동으로 /auth/callback으로 설정됨
+    const { data: authData, error: authError } = await supabaseSignUp(data);
 
     if (authError) {
       return {
@@ -168,7 +168,7 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
     if (authData.user && !authData.session) {
       return {
         success: true,
-        message: "가입 확인을 위해 이메일을 확인해주세요.",
+        message: "회원가입이 완료되었습니다. 가입 이메일을 확인하여 계정을 인증해주세요.",
         user: authData.user as unknown as User | undefined,
       };
     }
@@ -303,15 +303,24 @@ export async function signInWithSupabase(
  * Complete onboarding for new users
  * 
  * Flow:
- * 1. Send accessToken + onboarding data to BE /auth/onboard
+ * 1. Send supabaseAccessToken + onboarding data to BE /auth/onboard
  * 2. BE creates user profile and returns JWT token
  * 3. Store JWT token for future authenticated requests
+ * 4. Return success response
  */
 export async function completeOnboarding(
   supabaseAccessToken: string,
   onboardingData: OnboardingData
 ): Promise<AuthResponse> {
   try {
+    if (!supabaseAccessToken) {
+      return {
+        success: false,
+        message: "Supabase 토큰이 없습니다. 다시 로그인해주세요.",
+        error: new Error("Missing supabase token"),
+      };
+    }
+
     const response = await axios.post(
       `${API_BASE_URL}/auth/onboard`,
       {
@@ -327,8 +336,15 @@ export async function completeOnboarding(
 
     const beResponse = response.data;
 
+    // JWT 토큰 저장
     if (beResponse.token) {
       storeToken(beResponse.token);
+    } else {
+      return {
+        success: false,
+        message: "백엔드로부터 JWT 토큰을 받지 못했습니다.",
+        error: new Error("No JWT token in response"),
+      };
     }
 
     return {
@@ -341,6 +357,7 @@ export async function completeOnboarding(
   } catch (error) {
     const axiosError = error as any;
     const errorData = axiosError.response?.data || {};
+    console.error("Onboarding error:", errorData);
     return {
       success: false,
       message: errorData.message || "온보딩 실패",
@@ -423,50 +440,11 @@ export async function getSession() {
 }
 
 /**
- * Sign in with Google OAuth
- */
-export async function signInWithGoogle(): Promise<AuthResponse> {
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      return {
-        success: false,
-        message: error.message,
-        error,
-      };
-    }
-
-    return {
-      success: true,
-      message: "Google 로그인을 진행합니다...",
-    };
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Google 로그인 중 오류가 발생했습니다.";
-    return {
-      success: false,
-      message: errorMessage,
-      error,
-    };
-  }
-}
-
-/**
  * Reset password with email
  */
 export async function resetPassword(email: string): Promise<AuthResponse> {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
+    const { error } = await resetPasswordEmail(email);
 
     if (error) {
       return {
@@ -500,9 +478,7 @@ export async function updatePassword(
   newPassword: string
 ): Promise<AuthResponse> {
   try {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    const { error } = await updateUserPassword(newPassword);
 
     if (error) {
       return {
