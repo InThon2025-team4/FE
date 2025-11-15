@@ -1,60 +1,206 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Link from "next/link";
+import { signIn, signInWithGoogle } from "@/lib/auth";
 
 export function LoginCard() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [dialogTitle, setDialogTitle] = useState("알림");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setDialogTitle("오류");
+      setDialogMessage("이메일과 비밀번호를 입력해주세요.");
+      setDialogOpen(true);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signIn({
+        email,
+        password,
+      });
+
+      if (result.success) {
+        setDialogTitle("성공");
+        setDialogMessage(result.message || "로그인 성공!");
+        setDialogOpen(true);
+
+        // Redirect after short delay
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1500);
+      } else {
+        setDialogTitle("오류");
+        setDialogMessage(result.message || "로그인에 실패했습니다.");
+        setDialogOpen(true);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setDialogTitle("오류");
+      setDialogMessage("로그인 중 문제가 발생했습니다.");
+      setDialogOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithGoogle();
+      if (!result.success) {
+        setDialogTitle("오류");
+        setDialogMessage(result.message || "Google 로그인에 실패했습니다.");
+        setDialogOpen(true);
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      setDialogTitle("오류");
+      setDialogMessage("Google 로그인 중 문제가 발생했습니다.");
+      setDialogOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Login to your account</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-        <CardAction>
-          <Link href="/signup">
-            <Button variant={"link"}>Signup</Button>
-          </Link>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="flex flex-col gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-              </div>
-              <Input id="password" type="password" required />
+    <>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-center">{dialogTitle}</DialogTitle>
+            <DialogDescription className="text-center">
+              {dialogMessage}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <div className="w-[384px] rounded-xl border border-[#E5E5E5] bg-white shadow-sm py-6">
+        {/* Card Content */}
+        <div className="flex flex-col items-center gap-6">
+          {/* Header Section */}
+          <div className="flex flex-col gap-2 px-6">
+            <div className="flex items-center justify-center gap-2.5">
+              <h2 className="text-xl font-semibold text-[#0A0A0A] leading-[1.2em] tracking-[-0.02em]">
+                로그인
+              </h2>
             </div>
           </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full">
-          Login
-        </Button>
-        <Button variant="outline" className="w-full">
-          Login with Firebase
-        </Button>
-      </CardFooter>
-    </Card>
+
+          {/* Form Section */}
+          <div className="w-full px-6">
+            <form onSubmit={handleLogin}>
+              <div className="flex flex-col gap-7">
+                {/* Email Input */}
+                <div className="flex flex-col gap-3">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-[#0A0A0A]"
+                  >
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="m@example.com"
+                    className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs focus-visible:ring-0 focus-visible:ring-offset-0"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Password Input */}
+                <div className="flex flex-col gap-3">
+                  <Label
+                    htmlFor="password"
+                    className="text-sm font-medium text-[#0A0A0A]"
+                  >
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs focus-visible:ring-0 focus-visible:ring-offset-0"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Login Button */}
+                <div className="flex flex-col gap-3">
+                  <Button
+                    type="submit"
+                    className="w-full h-9 bg-[#DC143C] hover:bg-[#DC143C]/90 text-[#FAFAFA] text-sm rounded-lg shadow-xs"
+                    disabled={loading}
+                  >
+                    {loading ? "로그인 중..." : "로그인"}
+                  </Button>
+
+                  {/* Divider with Text */}
+                  <div className="flex items-center w-full">
+                    <div className="flex-1 h-px border-t border-[#E5E5E5]" />
+                    <div className="px-2">
+                      <span className="text-xs text-[#737373]">
+                        OR CONTINUE WITH
+                      </span>
+                    </div>
+                    <div className="flex-1 h-px border-t border-[#E5E5E5]" />
+                  </div>
+
+                  {/* Google Login Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGoogleLogin}
+                    className="w-full h-9 bg-white border border-[#E5E5E5] text-[#0A0A0A] text-sm font-medium rounded-lg shadow-xs hover:bg-white/90"
+                    disabled={loading}
+                  >
+                    Google로 로그인하기
+                  </Button>
+                </div>
+
+                {/* Signup Link */}
+                <div className="flex items-center justify-stretch pt-4">
+                  <Link
+                    href="/signup"
+                    className="flex-1 text-sm text-[#737373] text-center hover:underline"
+                  >
+                    계정이 없으신가요? 간편하게 회원가입하세요!
+                  </Link>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

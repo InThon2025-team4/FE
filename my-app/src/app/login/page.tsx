@@ -1,9 +1,13 @@
+import { Header } from "@/components/Header";
 import { LoginCard } from "./loginCard";
 
-export default function loginPage() {
+export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <LoginCard></LoginCard>
+    <div className="min-h-screen bg-white flex flex-col">
+      <Header />
+      <div className="flex-1 flex items-center justify-center">
+        <LoginCard />
+      </div>
     </div>
   );
 }

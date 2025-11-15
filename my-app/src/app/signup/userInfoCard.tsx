@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const techStackTags = [
   { id: "react", label: "React" },
@@ -46,6 +47,7 @@ const positionTags = [
 ];
 
 export function UserInfoCard() {
+  const router = useRouter();
   const [techStack, setTechStack] = useState<string[]>([]);
   const [position, setPosition] = useState<string[]>([]);
   const [portfolio, setPortfolio] = useState("");
@@ -110,7 +112,11 @@ export function UserInfoCard() {
           </form>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="button" className="w-full">
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => router.push("/dashboard")}
+          >
             Signup
           </Button>
           <Button variant="outline" className="w-full">
