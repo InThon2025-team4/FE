@@ -1,7 +1,7 @@
 "use client";
 
 import { SignupCard } from "./signupCard";
-import { UserInfoCard } from "./userInfoCard";
+import { UserInfoCard } from "../onBoarding/userInfoCard";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";

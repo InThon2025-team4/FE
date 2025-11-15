@@ -10,18 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 const techStackTags = [
   { id: "react", label: "React" },
@@ -46,26 +36,20 @@ const positionTags = [
   { id: "2", label: "AI" },
 ];
 
-export function UserInfoCard() {
-  const router = useRouter();
+interface UserInfoCardProps {
+  onNext: (data: {
+    techStack: string[];
+    position: string[];
+    portfolio?: string;
+  }) => void;
+}
+
+export function UserInfoCard({ onNext }: UserInfoCardProps) {
   const [techStack, setTechStack] = useState<string[]>([]);
   const [position, setPosition] = useState<string[]>([]);
-  const [portfolio, setPortfolio] = useState("");
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
 
   return (
     <>
-      <Dialog open={popupOpen} onOpenChange={setPopupOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-center">알림</DialogTitle>
-            <DialogDescription className="text-center">
-              {popupMessage}
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
       <Card className="w-full max-w-sm border-none shadow-none">
         <CardHeader className="text-center">
           <CardTitle>Signup</CardTitle>
@@ -96,18 +80,6 @@ export function UserInfoCard() {
                   placeholder="포지션을선택하세요"
                 ></TagDropDown>
               </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">포트폴리오 링크 (선택)</Label>
-                </div>
-                <Input
-                  id="portfolio"
-                  required
-                  value={portfolio}
-                  placeholder="https://example.com"
-                  onChange={(e) => setPortfolio(e.target.value)}
-                />
-              </div>
             </div>
           </form>
         </CardContent>
@@ -115,12 +87,19 @@ export function UserInfoCard() {
           <Button
             type="button"
             className="w-full"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => {
+              if (techStack.length === 0) {
+                alert("기술 스택을 선택해주세요.");
+                return;
+              }
+              if (position.length === 0) {
+                alert("포지션을 선택해주세요.");
+                return;
+              }
+              onNext({ techStack, position });
+            }}
           >
-            Signup
-          </Button>
-          <Button variant="outline" className="w-full">
-            Signup with Firebase
+            다음
           </Button>
         </CardFooter>
       </Card>
