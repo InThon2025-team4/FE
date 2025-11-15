@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { TagDropDown } from "./tagDropDown";
 import {
   Card,
   CardContent,
@@ -16,42 +17,42 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
-export function SignupCard({
-  setProgress,
-}: {
-  setProgress: (value: number) => void;
-}) {
-  const [email, setEmail] = useState("");
+const techStackTags = [
+  { id: "react", label: "React" },
+  { id: "typescript", label: "TypeScript" },
+  { id: "javascript", label: "JavaScript" },
+  { id: "nextjs", label: "Next.js" },
+  { id: "vuejs", label: "Vue.js" },
+  { id: "angular", label: "Angular" },
+  { id: "svelte", label: "Svelte" },
+  { id: "nodejs", label: "Node.js" },
+  { id: "python", label: "Python" },
+  { id: "ruby", label: "Ruby" },
+  { id: "java", label: "Java" },
+  { id: "csharp", label: "C#" },
+  { id: "php", label: "PHP" },
+  { id: "go", label: "Go" },
+];
+
+const positionTags = [
+  { id: "0", label: "FE" },
+  { id: "1", label: "BE" },
+  { id: "2", label: "AI" },
+];
+
+export function UserInfoCard() {
+  const [techStack, setTechStack] = useState<string[]>([]);
+  const [position, setPosition] = useState<string[]>([]);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
-  const passwordsMatch =
-    confirmPassword.length > 0 && password === confirmPassword;
-  const isSubmitDisabled =
-    !email || !password || !confirmPassword || !passwordsMatch;
-  const handleSignUp = () => {
-    if (isSubmitDisabled) {
-      // 에러 팝업
-      if (!email) {
-        setPopupMessage("이메일을 입력해주세요");
-      } else if (!password) {
-        setPopupMessage("비밀번호를 입력해주세요");
-      } else if (!passwordsMatch) {
-        setPopupMessage("비밀번호가 일치하지 않습니다.");
-      }
-      setPopupOpen(true);
-      return;
-    }
-
-    // 실제 회원가입 로직 실행
-    setProgress(100); // 성공 이후 progress 바꾸기
-  };
   return (
     <>
       <Dialog open={popupOpen} onOpenChange={setPopupOpen}>
@@ -72,32 +73,26 @@ export function SignupCard({
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+              <div className="grid gap-2 items-center">
+                <TagDropDown
+                  defaultTags={techStackTags}
+                  selected={techStack}
+                  setSelected={setTechStack}
+                ></TagDropDown>
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">포지션</Label>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <TagDropDown
+                  defaultTags={positionTags}
+                  selected={position}
+                  setSelected={setPosition}
+                ></TagDropDown>
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Confirm Password</Label>
+                  <Label htmlFor="password">이름</Label>
                 </div>
                 <Input
                   id="confirmPassword"
@@ -106,25 +101,12 @@ export function SignupCard({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                {confirmPassword.length > 0 && (
-                  <>
-                    {passwordsMatch ? (
-                      <p className="text-sm text-emerald-600">
-                        비밀번호가 일치합니다.
-                      </p>
-                    ) : (
-                      <p className="text-sm text-red-500">
-                        비밀번호가 일치하지 않습니다.
-                      </p>
-                    )}
-                  </>
-                )}
               </div>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="button" className="w-full" onClick={handleSignUp}>
+          <Button type="button" className="w-full">
             Signup
           </Button>
           <Button variant="outline" className="w-full">

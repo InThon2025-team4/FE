@@ -1,9 +1,19 @@
-import { SignupCard } from "./signupCard";
+"use client";
 
-export default function loginPage() {
+import { SignupCard } from "./signupCard";
+import { UserInfoCard } from "./userInfoCard";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+export default function SignUpPage() {
+  const [progress, setProgress] = useState(100);
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <SignupCard></SignupCard>
+      <Card className="w-full max-w-sm items-center">
+        <Progress value={progress} className="w-[60%]" />
+        {progress == 50 && <SignupCard setProgress={setProgress}></SignupCard>}
+        {progress == 100 && <UserInfoCard></UserInfoCard>}
+      </Card>
     </div>
   );
 }
