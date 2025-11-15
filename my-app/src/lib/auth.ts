@@ -95,7 +95,7 @@ function clearToken(): void {
 
 /**
  * Make authenticated API request with JWT token
- * 
+ *
  * Usage:
  * const response = await authenticatedFetch('/users/profile', {
  *   method: 'GET'
@@ -167,7 +167,7 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
 
     if (authData.user && !authData.session) {
       return {
-        success: true,
+        success: false,
         message: "가입 확인을 위해 이메일을 확인해주세요.",
         user: authData.user as unknown as User | undefined,
       };
@@ -203,7 +203,7 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
 
 /**
  * Sign in with Supabase and send accessToken to backend
- * 
+ *
  * Flow:
  * 1. Get accessToken from Supabase
  * 2. Send to BE /auth/supabase endpoint
@@ -301,7 +301,7 @@ export async function signInWithSupabase(
  */
 /**
  * Complete onboarding for new users
- * 
+ *
  * Flow:
  * 1. Send accessToken + onboarding data to BE /auth/onboard
  * 2. BE creates user profile and returns JWT token
