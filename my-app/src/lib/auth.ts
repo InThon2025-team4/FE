@@ -28,7 +28,14 @@ export interface AuthResponse {
 export async function signUp(data: SignUpData): Promise<AuthResponse> {
   try {
     const { email, password, name, techStack, position, portfolio } = data;
-
+    
+    if (!/^[^\s@]+@korea\.(ac\.kr|edu)$/.test(email.trim())) {
+      return {
+        success: false,
+        message:
+          "고려대학교 이메일 주소(korea.ac.kr 또는 korea.edu)를 입력해주세요.",
+      };
+    }
     // Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
