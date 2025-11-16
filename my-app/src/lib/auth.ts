@@ -49,6 +49,7 @@ export interface SignInData {
 export interface OnboardingData {
   authProvider: string;
   name: string;
+  accessToken: string;
   email: string;
   phone: string;
   githubId: string;
@@ -139,7 +140,7 @@ export async function authenticatedFetch(
 
 /**
  * Sign up a new user with email and password (Supabase)
- * 
+ *
  * Flow:
  * 1. Validate email (must be korea.ac.kr or korea.edu)
  * 2. Send sign up request to Supabase with email redirect callback to /auth/callback
@@ -211,16 +212,16 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
  * Sign in with Supabase and send accessToken to backend
  *
  * Backend endpoint: POST /auth/supabase
- * 
+ *
  * Request:
  * { accessToken: "supabase_access_token" }
- * 
+ *
  * Response 1 - Existing user (온보딩 완료):
  * {
  *   accessToken: "jwt_token",
  *   user: { id, email, name, ... }
  * }
- * 
+ *
  * Response 2 - New user (온보딩 필요):
  * {
  *   requiresOnboarding: true,
@@ -290,7 +291,10 @@ export async function signInWithSupabase(
 
       // Case 2: 신규 사용자 (온보딩 필요)
       // Response: { requiresOnboarding: true, supabaseUid, email, displayName, supabaseAccessToken }
-      if (beResponse.requiresOnboarding === true && beResponse.supabaseAccessToken) {
+      if (
+        beResponse.requiresOnboarding === true &&
+        beResponse.supabaseAccessToken
+      ) {
         return {
           success: false,
           message: "온보딩이 필요합니다.",
@@ -334,7 +338,7 @@ export async function signInWithSupabase(
  * Complete onboarding for new users
  *
  * Backend endpoint: POST /auth/onboard
- * 
+ *
  * Request:
  * {
  *   accessToken: "supabase_access_token_from_login",
@@ -349,7 +353,7 @@ export async function signInWithSupabase(
  *   proficiency?: "GOLD",
  *   portfolio?: { githubUrl: "url" }
  * }
- * 
+ *
  * Response:
  * {
  *   accessToken: "jwt_token",
@@ -370,7 +374,11 @@ export async function completeOnboarding(
     }
 
     // 필수 필드 검증
-    if (!onboardingData.name || !onboardingData.email || !onboardingData.phone) {
+    if (
+      !onboardingData.name ||
+      !onboardingData.email ||
+      !onboardingData.phone
+    ) {
       return {
         success: false,
         message: "필수 정보가 누락되었습니다.",
@@ -392,15 +400,11 @@ export async function completeOnboarding(
       portfolio: onboardingData.portfolio || null,
     };
 
-    const response = await axios.post(
-      `${API_BASE_URL}/auth/onboard`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axios.post(`${API_BASE_URL}/auth/onboard`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     const beResponse = response.data;
 

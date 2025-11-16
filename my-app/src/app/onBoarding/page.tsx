@@ -62,6 +62,7 @@ export default function OnBoardingPage() {
       const onboardingPayload: OnboardingData = {
         authProvider: "email",
         name: onboardingData.name,
+        accessToken: supabaseToken || "",
         email: email || "",
         phone: onboardingData.phone,
         githubId: onboardingData.githubId || "",
@@ -99,8 +100,8 @@ export default function OnBoardingPage() {
         {step === "user" ? (
           <UserInfoCard onNext={handleUserInfoNext} />
         ) : (
-          <DevInfoCard 
-            userInfo={userInfo} 
+          <DevInfoCard
+            userInfo={userInfo}
             onComplete={handleOnboardingComplete}
             isLoading={isLoading}
           />

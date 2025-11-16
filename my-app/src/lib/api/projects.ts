@@ -115,6 +115,7 @@ export interface OnboardingData {
   techStack: string[];
   position: string[];
   portfolio?: string;
+  accessToken: string;
   proficiency: number;
 }
 

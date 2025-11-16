@@ -38,7 +38,11 @@ interface DevInfoCardProps {
   isLoading?: boolean;
 }
 
-export function DevInfoCard({ userInfo, onComplete, isLoading = false }: DevInfoCardProps) {
+export function DevInfoCard({
+  userInfo,
+  onComplete,
+  isLoading = false,
+}: DevInfoCardProps) {
   const router = useRouter();
   const [name, setName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
@@ -77,7 +81,9 @@ export function DevInfoCard({ userInfo, onComplete, isLoading = false }: DevInfo
         githubId: githubId.trim(),
         techStacks: userInfo.techStack,
         positions: userInfo.position,
-        portfolio: portfolio.trim() ? { githubUrl: portfolio.trim() } : undefined,
+        portfolio: portfolio.trim()
+          ? { githubUrl: portfolio.trim() }
+          : undefined,
         proficiency: proficiency, // BRONZE, SILVER, GOLD, PLATINUM, DIAMOND, UNKNOWN
       };
 
