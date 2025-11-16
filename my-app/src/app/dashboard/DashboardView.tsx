@@ -18,6 +18,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "김개발", avatar: "KD", tier: 3 },
   },
   {
     id: 2,
@@ -26,6 +27,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "이디자인", avatar: "LD", tier: 4 },
   },
   {
     id: 3,
@@ -34,6 +36,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "박백엔드", avatar: "PB", tier: 2 },
   },
   {
     id: 4,
@@ -42,6 +45,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "최프론트", avatar: "CP", tier: 5 },
   },
   {
     id: 5,
@@ -50,6 +54,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "정풀스택", avatar: "JP", tier: 3 },
   },
   {
     id: 6,
@@ -58,6 +63,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "한모바일", avatar: "HM", tier: 1 },
   },
   {
     id: 7,
@@ -66,6 +72,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "신인공지능", avatar: "SI", tier: 4 },
   },
   {
     id: 8,
@@ -74,6 +81,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "오데브옵스", avatar: "OD", tier: 2 },
   },
   {
     id: 9,
@@ -82,6 +90,7 @@ const mockProjects = [
     difficulty: "보통" as const,
     positions: ["프론트엔드", "백엔드"],
     deadline: "2025. 11. 14",
+    author: { name: "유테스터", avatar: "YT", tier: 3 },
   },
 ];
 
@@ -92,6 +101,11 @@ interface DisplayProject {
   difficulty: "쉬움" | "보통" | "어려움";
   positions: string[];
   deadline: string;
+  author?: {
+    name: string;
+    avatar?: string;
+    tier?: number;
+  };
 }
 
 export default function DashboardView() {

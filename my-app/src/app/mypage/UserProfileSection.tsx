@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { TierIcon } from "@/components/TierIcon";
 import type { UserProfile } from "./MyPageView";
 
 interface UserProfileSectionProps {
@@ -18,7 +19,12 @@ export function UserProfileSection({ profile }: UserProfileSectionProps) {
           </span>
         </div>
         <div className="flex flex-col gap-2 flex-1">
-          <h3 className="text-2xl font-semibold text-black">{profile.name}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-2xl font-semibold text-black">
+              {profile.name}
+            </h3>
+            <TierIcon tier={profile.tier || 3} />
+          </div>
           <p className="text-base text-[#505050]">{profile.email}</p>
           {profile.bio && (
             <p className="text-sm text-[#0A0A0A] mt-2">{profile.bio}</p>

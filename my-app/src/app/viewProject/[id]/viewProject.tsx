@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ApplyModal } from "./ApplyModal";
 import { Header } from "@/components/Header";
+import { getCurrentUser } from "@/lib/auth";
 
 export function ViewProject() {
   const router = useRouter();
   const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user on mount
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { user } = await getCurrentUser();
+      if (user?.id) {
+        setCurrentUserId(user.id);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   // Mock data - replace with actual data from props or API
   const projectData = {
@@ -18,6 +31,7 @@ export function ViewProject() {
     title: "프로젝트 제목입니다",
     status: "모집 중",
     author: {
+      id: "user-123", // Author's user ID
       name: "사용자 이름",
       avatar: null,
       initials: "CN",
@@ -60,9 +74,22 @@ export function ViewProject() {
     },
   ];
 
+  // Check if current user is the project owner
+  const isOwner = useMemo(() => {
+    return currentUserId !== null && currentUserId === projectData.author.id;
+  }, [currentUserId, projectData.author.id]);
+
   const handleApplySuccess = () => {
     // Navigate back to viewProject page (refresh or go to project list)
     router.refresh();
+  };
+
+  const handleEditProject = () => {
+    router.push(`/project/${projectData.id}/edit`);
+  };
+
+  const handleViewApplications = () => {
+    router.push(`/project/${projectData.id}/applications`);
   };
 
   return (
@@ -160,14 +187,33 @@ export function ViewProject() {
           </div>
         </div>
 
-        {/* Apply Button Section */}
+        {/* Action Buttons Section */}
         <div className="w-full flex flex-col items-end gap-2.5 px-[45px]">
-          <Button
-            onClick={() => setApplyModalOpen(true)}
-            className="bg-[#771F21] hover:bg-[#771F21]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg"
-          >
-            지원하기
-          </Button>
+          {isOwner ? (
+            // Show edit and view applications buttons for project owner
+            <div className="flex gap-2">
+              <Button
+                onClick={handleEditProject}
+                className="bg-[#488FE1] hover:bg-[#488FE1]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg"
+              >
+                수정하기
+              </Button>
+              <Button
+                onClick={handleViewApplications}
+                className="bg-[#771F21] hover:bg-[#771F21]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg"
+              >
+                지원자 확인하기
+              </Button>
+            </div>
+          ) : (
+            // Show apply button for other users
+            <Button
+              onClick={() => setApplyModalOpen(true)}
+              className="bg-[#771F21] hover:bg-[#771F21]/90 text-white text-sm font-medium px-6 py-2.5 h-auto rounded-lg"
+            >
+              지원하기
+            </Button>
+          )}
         </div>
 
         {/* Project Description Section */}

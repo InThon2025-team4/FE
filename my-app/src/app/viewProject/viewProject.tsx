@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ApplyModal } from "./[id]/ApplyModal";
 import { getProjectById, Project } from "@/lib/api/projects";
+import { TierIcon } from "@/components/TierIcon";
 
 export function ViewProject() {
   const router = useRouter();
@@ -179,9 +180,12 @@ export function ViewProject() {
                 {getUserInitials(projectData.author.name)}
               </span>
             </div>
-            <span className="text-base font-medium text-[#0A0A0A]">
-              {projectData.author.name}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-medium text-[#0A0A0A]">
+                {projectData.author.name}
+              </span>
+              <TierIcon tier={3} size={20} />
+            </div>
             <div className="w-[9px] h-[22px] border-l border-[#D9D9D9]" />
             <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#505050] w-[100px]">
               {projectData.createdAt}

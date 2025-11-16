@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { TierIcon } from "@/components/TierIcon";
 
 interface ProjectCardProps {
   title: string;
@@ -8,6 +9,11 @@ interface ProjectCardProps {
   difficulty: "쉬움" | "보통" | "어려움";
   positions: string[];
   deadline: string;
+  author?: {
+    name: string;
+    avatar?: string;
+    tier?: number;
+  };
 }
 
 export function ProjectCard({
@@ -16,6 +22,7 @@ export function ProjectCard({
   difficulty,
   positions,
   deadline,
+  author,
 }: ProjectCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -54,6 +61,21 @@ export function ProjectCard({
             {difficulty}
           </Badge>
         </div>
+
+        {/* Author Profile */}
+        {author && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0">
+              <span className="text-xs font-medium text-white">
+                {author.avatar || author.name.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-sm font-medium text-black">
+              {author.name}
+            </span>
+            <TierIcon tier={author.tier || 3} size={16} />
+          </div>
+        )}
       </div>
 
       {/* Bottom Section */}
