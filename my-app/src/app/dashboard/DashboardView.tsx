@@ -129,7 +129,12 @@ export default function DashboardView() {
             title: project.name,
             daysAgo: calculateDaysAgo(project.createdAt),
             difficulty: mapDifficulty(project.difficulty),
-            positions: extractPositions({}),
+            positions: extractPositions({
+              frontend: project.limitFE,
+              backend: project.limitBE,
+              ai: project.limitAI,
+              mobile: project.limitMobile,
+            }),
             deadline: formatDate(project.projectEndDate),
           }));
           setProjects(transformedProjects);
@@ -170,19 +175,17 @@ export default function DashboardView() {
   };
 
   const extractPositions = (positions: {
-    frontend?: string;
-    backend?: string;
-    ai?: string;
-    mobile?: string;
+    frontend?: number;
+    backend?: number;
+    ai?: number;
+    mobile?: number;
   }): string[] => {
     const result: string[] = [];
-    if (positions.frontend && positions.frontend !== "마감")
-      result.push("프론트엔드");
-    if (positions.backend && positions.backend !== "마감")
-      result.push("백엔드");
-    if (positions.ai && positions.ai !== "마감") result.push("인공지능");
-    if (positions.mobile && positions.mobile !== "마감") result.push("모바일");
-    return result.length > 0 ? result : ["프론트엔드", "백엔드"];
+    if (positions.frontend) result.push("프론트엔드");
+    if (positions.backend) result.push("백엔드");
+    if (positions.ai) result.push("인공지능");
+    if (positions.mobile) result.push("모바일");
+    return result;
   };
 
   const formatDate = (dateString: string): string => {
