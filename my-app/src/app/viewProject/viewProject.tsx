@@ -206,11 +206,11 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="프론트엔드"
-              value={projectData.positions.frontend || "마감"}
+              value={`${projectData.currentFE}명` || "마감"}
             />
             <ProjectDetailItem
               label="백엔드"
-              value={projectData.positions.backend || "마감"}
+              value={`${projectData.currentBE}명` || "마감"}
             />
           </div>
 
@@ -218,11 +218,11 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="인공지능"
-              value={projectData.positions.ai || "마감"}
+              value={`${projectData.currentAI}명` || "마감"}
             />
             <ProjectDetailItem
               label="모바일"
-              value={projectData.positions.mobile || "마감"}
+              value={`${projectData.currentMobile}명` || "마감"}
             />
           </div>
 
