@@ -20,7 +20,7 @@ export interface UserProfile {
   position: string[];
   portfolio?: string;
   bio?: string;
-  tier?: number;
+  tier?: string;
 }
 
 export interface Project {
@@ -43,7 +43,7 @@ export function MyPageView() {
     techStack: ["React", "TypeScript", "Next.js"],
     position: ["FE"],
     portfolio: "https://portfolio.example.com",
-    tier: 3,
+    tier: "GOLD",
   });
 
   // Mock applied projects - replace with actual data from your API

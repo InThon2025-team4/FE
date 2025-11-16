@@ -179,7 +179,7 @@ export function ViewProject() {
               <span className="text-base font-medium text-[#0A0A0A]">
                 {projectData.author.name}
               </span>
-              <TierIcon tier={3} size={20} />
+              <TierIcon tier="GOLD" size={20} />
             </div>
             <div className="w-[9px] h-[22px] border-l border-[#D9D9D9]" />
             <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#505050] w-[100px]">

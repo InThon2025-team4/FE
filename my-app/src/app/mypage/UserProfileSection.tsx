@@ -28,7 +28,7 @@ export function UserProfileSection({ profile }: UserProfileSectionProps) {
             <h3 className="text-2xl font-semibold text-black">
               {profile.name}
             </h3>
-            <TierIcon tier={profile.tier || 3} />
+            <TierIcon tier={profile.tier || "GOLD"} />
           </div>
           <p className="text-base text-[#505050]">{profile.email}</p>
           {profile.bio && (

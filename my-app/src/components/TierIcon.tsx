@@ -3,20 +3,20 @@ export const TierIcon = ({
   tier,
   size = 24,
 }: {
-  tier: number;
+  tier: string;
   size?: number;
 }) => {
-  const getTierColor = (tier: number) => {
+  const getTierColor = (tier: string) => {
     switch (tier) {
-      case 1:
+      case "BRONZE":
         return "#CD7F32"; // Bronze
-      case 2:
+      case "SILVER":
         return "#C0C0C0"; // Silver
-      case 3:
+      case "GOLD":
         return "#FFD700"; // Gold
-      case 4:
+      case "PLATINUM":
         return "#B9F2FF"; // Platinum
-      case 5:
+      case "DIAMOND":
         return "#E0115F"; // Diamond
       default:
         return "#FFD700";

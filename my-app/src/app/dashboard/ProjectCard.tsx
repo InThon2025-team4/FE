@@ -13,7 +13,7 @@ interface ProjectCardProps {
   author?: {
     name: string;
     avatar?: string;
-    tier?: number;
+    tier?: string;
   };
 }
 
@@ -78,7 +78,7 @@ export function ProjectCard({
             <span className="text-sm font-medium text-black">
               {author.name}
             </span>
-            <TierIcon tier={author.tier || 3} size={16} />
+            <TierIcon tier={author.tier || "GOLD"} size={16} />
           </div>
         )}
       </div>

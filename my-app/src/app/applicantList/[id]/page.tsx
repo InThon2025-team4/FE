@@ -29,7 +29,7 @@ interface Applicant {
   appliedAt: string;
   daysAgo: string;
   avatar: string;
-  tier: 1 | 2 | 3 | 4 | 5;
+  tier: "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND";
   techStack: string[];
   portfolio?: string;
 }
@@ -48,7 +48,7 @@ const mockApplicants: Applicant[] = [
     appliedAt: "2025-11-14T10:00:00Z",
     daysAgo: "2일 전",
     avatar: "CN",
-    tier: 3,
+    tier: "GOLD",
     techStack: ["Javascript", "React", "TypeScript"],
     portfolio: "link.example.com",
   },
@@ -63,7 +63,7 @@ const mockApplicants: Applicant[] = [
     appliedAt: "2025-11-14T10:00:00Z",
     daysAgo: "2일 전",
     avatar: "JD",
-    tier: 4,
+    tier: "PLATINUM",
     techStack: ["Node.js", "Express", "MongoDB"],
     portfolio: "github.com/example",
   },
@@ -78,7 +78,7 @@ const mockApplicants: Applicant[] = [
     appliedAt: "2025-11-14T10:00:00Z",
     daysAgo: "2일 전",
     avatar: "KS",
-    tier: 2,
+    tier: "SILVER",
     techStack: ["Vue.js", "Nuxt.js", "CSS"],
   },
   {
@@ -92,7 +92,7 @@ const mockApplicants: Applicant[] = [
     appliedAt: "2025-11-14T10:00:00Z",
     daysAgo: "3일 전",
     avatar: "LM",
-    tier: 5,
+    tier: "DIAMOND",
     techStack: ["Python", "TensorFlow", "PyTorch"],
     portfolio: "kaggle.com/example",
   },
