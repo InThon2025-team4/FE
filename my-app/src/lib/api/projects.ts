@@ -38,6 +38,52 @@ export interface Project {
   updatedAt: string;
 }
 
+export interface myProject {
+  id: string;
+  name: string;
+  description: string;
+  difficulty: string;
+  recruitmentStartDate: string;
+  recruitmentEndDate: string;
+  projectStartDate: string;
+  projectEndDate: string;
+  githubRepoUrl: string;
+  limitBE: number;
+  limitFE: number;
+  limitPM: number;
+  limitMobile: number;
+  limitAI: number;
+  ownerId: string;
+  owner: any;
+  memberCount: number;
+  applicationCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface userProfile {
+  id: string;
+  supabaseUid: string;
+  authProvider: string;
+  email: string;
+  name: "Alice Kim";
+  phone: "010-1111-2222";
+  githubId: "alicehub";
+  profileImageUrl: "https://example.com/alice.png";
+  techStacks: string[];
+  positions: string[];
+  proficiency: "INTERMEDIATE";
+  portfolio: any;
+}
+export interface userprofileResponse {
+  success: boolean;
+  data: userProfile[];
+  message?: string;
+}
+export interface myProjectListResponse {
+  success: boolean;
+  data: myProject[];
+  message?: string;
+}
 export interface ProjectListResponse {
   success: boolean;
   data: Project[];
@@ -153,6 +199,76 @@ export async function getDashboardProjects(): Promise<ProjectListResponse> {
   }
 }
 
+export async function getAppliedProjects(): Promise<myProjectListResponse> {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/project/applications/my`);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard projects:", error);
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        data: [],
+        message: error.response?.data?.message || "Failed to fetch projects",
+      };
+    }
+    return {
+      success: false,
+      data: [],
+      message: "An unexpected error occurred",
+    };
+  }
+}
+export async function getMyProjects(): Promise<myProjectListResponse> {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/project/dashboard/owner`);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard projects:", error);
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        data: [],
+        message: error.response?.data?.message || "Failed to fetch projects",
+      };
+    }
+    return {
+      success: false,
+      data: [],
+      message: "An unexpected error occurred",
+    };
+  }
+}
+
+export async function getProfile(): Promise<userprofileResponse> {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/auth/profile`);
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard projects:", error);
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        data: [],
+        message: error.response?.data?.message || "Failed to fetch projects",
+      };
+    }
+    return {
+      success: false,
+      data: [],
+      message: "An unexpected error occurred",
+    };
+  }
+}
 /**
  * Get projects owned by the current user
  * GET /project/dashboard/owner
