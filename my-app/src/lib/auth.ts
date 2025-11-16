@@ -133,7 +133,7 @@ export async function authenticatedFetch(
 
 /**
  * Sign up a new user with email and password (Supabase)
- * 
+ *
  * Flow:
  * 1. Validate email (must be korea.ac.kr or korea.edu)
  * 2. Send sign up request to Supabase with email redirect callback to /auth/callback
