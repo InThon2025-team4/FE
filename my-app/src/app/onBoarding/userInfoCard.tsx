@@ -14,26 +14,32 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
 const techStackTags = [
-  { id: "react", label: "React" },
-  { id: "typescript", label: "TypeScript" },
-  { id: "javascript", label: "JavaScript" },
-  { id: "nextjs", label: "Next.js" },
-  { id: "vuejs", label: "Vue.js" },
-  { id: "angular", label: "Angular" },
-  { id: "svelte", label: "Svelte" },
-  { id: "nodejs", label: "Node.js" },
-  { id: "python", label: "Python" },
-  { id: "ruby", label: "Ruby" },
-  { id: "java", label: "Java" },
-  { id: "csharp", label: "C#" },
-  { id: "php", label: "PHP" },
-  { id: "go", label: "Go" },
+  { id: "REACT", label: "React" },
+  { id: "TYPESCRIPT", label: "TypeScript" },
+  { id: "JAVASCRIPT", label: "JavaScript" },
+  { id: "NEXTJS", label: "Next.js" },
+  { id: "VUEJS", label: "Vue.js" },
+  { id: "ANGULAR", label: "Angular" },
+  { id: "SVELTE", label: "Svelte" },
+  { id: "NODEJS", label: "Node.js" },
+  { id: "PYTHON", label: "Python" },
+  { id: "RUBY", label: "Ruby" },
+  { id: "JAVA", label: "Java" },
+  { id: "CSHARP", label: "C#" },
+  { id: "PHP", label: "PHP" },
+  { id: "GO", label: "Go" },
+  { id: "DJANGO", label: "Django" },
+  { id: "FASTAPI", label: "FastAPI" },
+  { id: "TENSORFLOW", label: "TensorFlow" },
+  { id: "NESTJS", label: "NestJS" },
 ];
 
 const positionTags = [
-  { id: "0", label: "FE" },
-  { id: "1", label: "BE" },
-  { id: "2", label: "AI" },
+  { id: "FRONTEND", label: "Frontend" },
+  { id: "BACKEND", label: "Backend" },
+  { id: "AI", label: "AI" },
+  { id: "MOBILE", label: "Mobile" },
+  { id: "PM", label: "PM" },
 ];
 
 interface UserInfoCardProps {

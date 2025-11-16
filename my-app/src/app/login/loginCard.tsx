@@ -43,7 +43,7 @@ export function LoginCard() {
         password,
       });
 
-      if (result.onboardingRequired) {
+      if (result.requiresOnboarding || result.onboardingRequired) {
         // New user - redirect to onboarding
         setDialogTitle("환영합니다!");
         setDialogMessage("추가 정보를 입력해주세요.");
@@ -51,10 +51,10 @@ export function LoginCard() {
 
         setTimeout(() => {
           router.push(
-            `/onboarding?supabaseUid=${result.supabaseUid}&email=${result.email}`
+            `/onboarding?supabaseToken=${encodeURIComponent(result.supabaseAccessToken || "")}&email=${encodeURIComponent(result.email || "")}`
           );
         }, 1500);
-      } else if (result.success) {
+      } else if (result.success && result.token) {
         // Existing user - login successful
         setDialogTitle("성공");
         setDialogMessage(result.message || "로그인 성공!");

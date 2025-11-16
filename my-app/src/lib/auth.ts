@@ -47,12 +47,16 @@ export interface SignInData {
 }
 
 export interface OnboardingData {
+  authProvider: string;
   name: string;
-  phone?: string;
-  github?: string;
-  techStack: string[];
-  position?: string[];
-  portfolio?: string;
+  email: string;
+  phone: string;
+  githubId: string;
+  profileImageUrl?: string;
+  techStacks: string[];
+  positions: string[];
+  proficiency?: string;
+  portfolio?: Record<string, unknown>;
 }
 
 export interface AuthResponse {
@@ -61,16 +65,18 @@ export interface AuthResponse {
   user?: User;
   session?: unknown;
   token?: string;
+  accessToken?: string;
   error?: unknown;
-  onboardingRequired?: boolean;
+  requiresOnboarding?: boolean;
   supabaseUid?: string;
   email?: string;
+  supabaseAccessToken?: string;
 }
 
 /**
  * Helper function to store JWT token
  */
-function storeToken(token: string): void {
+export function storeToken(token: string): void {
   if (typeof window !== "undefined") {
     localStorage.setItem("jwtToken", token);
   }
@@ -204,12 +210,25 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
 /**
  * Sign in with Supabase and send accessToken to backend
  *
- * Flow:
- * 1. Get accessToken from Supabase
- * 2. Send to BE /auth/supabase endpoint
- * 3. BE validates token and checks if user exists
- * 4. If existing user: return JWT token
- * 5. If new user: return onboardingRequired flag
+ * Backend endpoint: POST /auth/supabase
+ * 
+ * Request:
+ * { accessToken: "supabase_access_token" }
+ * 
+ * Response 1 - Existing user (온보딩 완료):
+ * {
+ *   accessToken: "jwt_token",
+ *   user: { id, email, name, ... }
+ * }
+ * 
+ * Response 2 - New user (온보딩 필요):
+ * {
+ *   requiresOnboarding: true,
+ *   supabaseUid: "uid",
+ *   email: "email",
+ *   displayName: "name",
+ *   supabaseAccessToken: "token"
+ * }
  */
 export async function signInWithSupabase(
   data: SignInData
@@ -217,6 +236,7 @@ export async function signInWithSupabase(
   try {
     const { email, password } = data;
 
+    // Step 1: Supabase 로그인
     const { data: authData, error: authError } = await supabaseSignIn({
       email,
       password,
@@ -238,6 +258,7 @@ export async function signInWithSupabase(
       };
     }
 
+    // Step 2: 백엔드 /auth/supabase에 Supabase accessToken 전송
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/supabase`,
@@ -253,32 +274,45 @@ export async function signInWithSupabase(
 
       const beResponse = response.data;
 
-      if (beResponse.onboardingRequired) {
+      // Case 1: 기존 사용자 (온보딩 완료)
+      // Response: { accessToken, user }
+      if (beResponse.accessToken && beResponse.user) {
+        storeToken(beResponse.accessToken);
         return {
-          success: false,
-          message: "온보딩이 필요합니다.",
-          onboardingRequired: true,
-          supabaseUid: beResponse.supabaseUid,
-          email: beResponse.email,
-          token: authData.session.access_token,
+          success: true,
+          message: "로그인 성공!",
+          token: beResponse.accessToken,
+          accessToken: beResponse.accessToken,
+          user: beResponse.user,
           error: null,
         };
       }
 
-      if (beResponse.token) {
-        storeToken(beResponse.token);
+      // Case 2: 신규 사용자 (온보딩 필요)
+      // Response: { requiresOnboarding: true, supabaseUid, email, displayName, supabaseAccessToken }
+      if (beResponse.requiresOnboarding === true && beResponse.supabaseAccessToken) {
+        return {
+          success: false,
+          message: "온보딩이 필요합니다.",
+          onboardingRequired: true,
+          requiresOnboarding: true,
+          supabaseUid: beResponse.supabaseUid,
+          email: beResponse.email,
+          supabaseAccessToken: beResponse.supabaseAccessToken,
+          error: null,
+        };
       }
 
+      // Case 3: 예상치 못한 응답 형식
       return {
-        success: true,
-        message: "로그인 성공!",
-        token: beResponse.token,
-        user: beResponse.user,
-        error: null,
+        success: false,
+        message: "예상치 못한 응답 형식입니다.",
+        error: new Error("Unexpected response format"),
       };
     } catch (error) {
       const axiosError = error as any;
       const errorData = axiosError.response?.data || {};
+      console.error("Backend /auth/supabase error:", errorData);
       return {
         success: false,
         message: errorData.message || "백엔드 인증 실패",
@@ -297,16 +331,30 @@ export async function signInWithSupabase(
 }
 
 /**
- * Sign in an existing user with email and password (legacy)
- */
-/**
  * Complete onboarding for new users
  *
- * Flow:
- * 1. Send supabaseAccessToken + onboarding data to BE /auth/onboard
- * 2. BE creates user profile and returns JWT token
- * 3. Store JWT token for future authenticated requests
- * 4. Return success response
+ * Backend endpoint: POST /auth/onboard
+ * 
+ * Request:
+ * {
+ *   accessToken: "supabase_access_token_from_login",
+ *   authProvider: "email",
+ *   name: "user name",
+ *   email: "user@korea.ac.kr",
+ *   phone: "010-XXXX-XXXX",
+ *   githubId: "github_username",
+ *   profileImageUrl?: "image_url",
+ *   techStacks: ["NEXTJS", "TYPESCRIPT"],
+ *   positions: ["FRONTEND"],
+ *   proficiency?: "GOLD",
+ *   portfolio?: { githubUrl: "url" }
+ * }
+ * 
+ * Response:
+ * {
+ *   accessToken: "jwt_token",
+ *   user: { id, email, name, ... }
+ * }
  */
 export async function completeOnboarding(
   supabaseAccessToken: string,
@@ -321,12 +369,32 @@ export async function completeOnboarding(
       };
     }
 
+    // 필수 필드 검증
+    if (!onboardingData.name || !onboardingData.email || !onboardingData.phone) {
+      return {
+        success: false,
+        message: "필수 정보가 누락되었습니다.",
+        error: new Error("Missing required fields"),
+      };
+    }
+
+    const payload = {
+      accessToken: supabaseAccessToken,
+      authProvider: onboardingData.authProvider || "email",
+      name: onboardingData.name,
+      email: onboardingData.email,
+      phone: onboardingData.phone,
+      githubId: onboardingData.githubId || "",
+      profileImageUrl: onboardingData.profileImageUrl || null,
+      techStacks: onboardingData.techStacks || [],
+      positions: onboardingData.positions || [],
+      proficiency: onboardingData.proficiency || "UNKNOWN",
+      portfolio: onboardingData.portfolio || null,
+    };
+
     const response = await axios.post(
       `${API_BASE_URL}/auth/onboard`,
-      {
-        accessToken: supabaseAccessToken,
-        ...onboardingData,
-      },
+      payload,
       {
         headers: {
           "Content-Type": "application/json",
@@ -336,10 +404,8 @@ export async function completeOnboarding(
 
     const beResponse = response.data;
 
-    // JWT 토큰 저장
-    if (beResponse.token) {
-      storeToken(beResponse.token);
-    } else {
+    // 응답에서 JWT 토큰 확인
+    if (!beResponse.accessToken) {
       return {
         success: false,
         message: "백엔드로부터 JWT 토큰을 받지 못했습니다.",
@@ -347,10 +413,14 @@ export async function completeOnboarding(
       };
     }
 
+    // JWT 토큰 저장
+    storeToken(beResponse.accessToken);
+
     return {
       success: true,
       message: "온보딩 완료! 로그인되었습니다.",
-      token: beResponse.token,
+      token: beResponse.accessToken,
+      accessToken: beResponse.accessToken,
       user: beResponse.user,
       error: null,
     };

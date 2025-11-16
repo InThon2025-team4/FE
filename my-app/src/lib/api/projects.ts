@@ -25,7 +25,13 @@ export interface Project {
   status: string;
   tags: string[];
   ownerId: string;
-  owner: any;
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+    profileImageUrl: string;
+    proficiency: string;
+  };
   memberCount: number;
   applicationCount: number;
   createdAt: string;

@@ -27,7 +27,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { submitOnboarding } from "@/lib/api/projects";
 import { Input } from "@/components/ui/input";
 
 interface DevInfoCardProps {
@@ -35,10 +34,15 @@ interface DevInfoCardProps {
     techStack: string[];
     position: string[];
   };
+  onComplete: (data: any) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function DevInfoCard({ userInfo }: DevInfoCardProps) {
+export function DevInfoCard({ userInfo, onComplete, isLoading = false }: DevInfoCardProps) {
   const router = useRouter();
+  const [name, setName] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [githubId, setGithubId] = useState<string>("");
   const [proficiency, setProficiency] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -46,6 +50,19 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
   const [portfolio, setPortfolio] = useState("");
 
   const handleSubmit = async () => {
+    // 필수 필드 검증
+    if (!name.trim()) {
+      alert("이름을 입력해주세요.");
+      return;
+    }
+    if (!phone.trim()) {
+      alert("전화번호를 입력해주세요.");
+      return;
+    }
+    if (!githubId.trim()) {
+      alert("GitHub ID를 입력해주세요.");
+      return;
+    }
     if (!proficiency) {
       alert("개발 능력을 선택해주세요.");
       return;
@@ -55,27 +72,22 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
 
     try {
       const onboardingData = {
-        techStack: userInfo.techStack,
-        position: userInfo.position,
-        portfolio: portfolio === "" ? undefined : portfolio,
-        proficiency: parseInt(proficiency),
+        name: name.trim(),
+        phone: phone.trim(),
+        githubId: githubId.trim(),
+        techStacks: userInfo.techStack,
+        positions: userInfo.position,
+        portfolio: portfolio.trim() ? { githubUrl: portfolio.trim() } : undefined,
+        proficiency: proficiency, // BRONZE, SILVER, GOLD, PLATINUM, DIAMOND, UNKNOWN
       };
 
-      const result = await submitOnboarding(onboardingData);
+      await onComplete(onboardingData);
 
-      if (result.success) {
-        setPopupMessage("회원가입이 완료되었습니다!");
-        setPopupOpen(true);
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1500);
-      } else {
-        alert(result.message || "온보딩 중 오류가 발생했습니다.");
-      }
+      setPopupMessage("회원가입이 완료되었습니다!");
+      setPopupOpen(true);
     } catch (error) {
       console.error("Onboarding error:", error);
       alert("온보딩 중 오류가 발생했습니다. 다시 시도해주세요.");
-    } finally {
       setLoading(false);
     }
   };
@@ -100,33 +112,62 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="name">이름 *</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="홍길동"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="phone">전화번호 *</Label>
+                <Input
+                  id="phone"
+                  type="text"
+                  placeholder="010-1234-5678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="githubId">GitHub ID *</Label>
+                <Input
+                  id="githubId"
+                  type="text"
+                  placeholder="your-github-id"
+                  value={githubId}
+                  onChange={(e) => setGithubId(e.target.value)}
+                />
+              </div>
+
               <div className="grid gap-2 items-center">
-                <div className="flex items-center">
-                  <Label htmlFor="proficiency">개발 능력</Label>
-                </div>
+                <Label htmlFor="proficiency">개발 능력 *</Label>
 
                 <Select value={proficiency} onValueChange={setProficiency}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="개발 능력을 선택하세요 (1-5)" />
+                    <SelectValue placeholder="개발 능력을 선택하세요" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 - 초급</SelectItem>
-                    <SelectItem value="2">2 - 초중급</SelectItem>
-                    <SelectItem value="3">3 - 중급</SelectItem>
-                    <SelectItem value="4">4 - 중고급</SelectItem>
-                    <SelectItem value="5">5 - 고급</SelectItem>
+                    <SelectItem value="BRONZE">BRONZE - 초급</SelectItem>
+                    <SelectItem value="SILVER">SILVER - 초중급</SelectItem>
+                    <SelectItem value="GOLD">GOLD - 중급</SelectItem>
+                    <SelectItem value="PLATINUM">PLATINUM - 중고급</SelectItem>
+                    <SelectItem value="DIAMOND">DIAMOND - 고급</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="portfolio">포트폴리오 링크 (선택)</Label>
-                </div>
+                <Label htmlFor="portfolio">포트폴리오 링크 (선택)</Label>
                 <Input
                   id="portfolio"
                   type="text"
-                  placeholder="https://example.com"
+                  placeholder="https://github.com/your-id"
                   value={portfolio}
                   onChange={(e) => setPortfolio(e.target.value)}
                 />
@@ -139,9 +180,9 @@ export function DevInfoCard({ userInfo }: DevInfoCardProps) {
             type="button"
             className="w-full bg-[var(--color-red)]"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || isLoading}
           >
-            {loading ? "가입 중..." : "가입 완료"}
+            {loading || isLoading ? "가입 중..." : "가입 완료"}
           </Button>
         </CardFooter>
       </Card>
