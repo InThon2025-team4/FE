@@ -18,6 +18,12 @@ export interface Project {
   limitPM: number;
   limitMobile: number;
   limitAI: number;
+  currentBE: number;
+  currentFE: number;
+  currentMobile: number;
+  currentAI: number;
+  status: string;
+  tags: string[];
   ownerId: string;
   owner: any;
   memberCount: number;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -94,32 +95,22 @@ export function ViewProject() {
     {
       label: "프론트엔드",
       value: "frontend",
-      available: Boolean(
-        projectData.positions?.frontend &&
-          projectData.positions.frontend !== "마감"
-      ),
+      available: Boolean(projectData.currentFE?.valueOf()),
     },
     {
       label: "백엔드",
       value: "backend",
-      available: Boolean(
-        projectData.positions?.backend &&
-          projectData.positions.backend !== "마감"
-      ),
+      available: Boolean(projectData.currentBE?.valueOf()),
     },
     {
       label: "인공지능",
       value: "ai",
-      available: Boolean(
-        projectData.positions?.ai && projectData.positions.ai !== "마감"
-      ),
+      available: Boolean(projectData.currentAI?.valueOf()),
     },
     {
       label: "모바일",
       value: "mobile",
-      available: Boolean(
-        projectData.positions?.mobile && projectData.positions.mobile !== "마감"
-      ),
+      available: Boolean(projectData.currentMobile?.valueOf()),
     },
   ];
 
@@ -143,10 +134,14 @@ export function ViewProject() {
 
           {/* User Avatar */}
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {getUserInitials(projectData.author.name)}
-              </span>
+            <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt={projectData.author.name}
+                width={40}
+                height={40}
+                className="object-cover"
+              />
             </div>
           </div>
         </div>

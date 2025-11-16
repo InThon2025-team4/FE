@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 interface HeaderProps {
   userInitials?: string;
   showUser?: boolean;
@@ -9,10 +10,9 @@ export function Header({ userInitials = "CN", showUser = true }: HeaderProps) {
   return (
     <header className="h-16 w-full border-b border-[#E5E5E5] flex items-center justify-center bg-white">
       <div className="w-full max-w-[1440px] px-6 flex items-center justify-between">
-        {/* Logo Section */}
         <Link href="/dashboard">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded border-2 border-[#DC143C]" />
+            <img src="/logo.png" alt="KUGit Logo" width={24} height={24} />
             <h1 className="text-base font-bold text-[#0A0A0A]">KUGit</h1>
           </div>
         </Link>
@@ -21,10 +21,14 @@ export function Header({ userInitials = "CN", showUser = true }: HeaderProps) {
         {showUser && (
           <div className="flex items-center gap-2.5">
             <Link href="/mypage">
-              <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center">
-                <span className="text-sm font-medium text-white">
-                  {userInitials}
-                </span>
+              <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/logo.png"
+                  alt="User Avatar"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                />
               </div>
             </Link>
           </div>

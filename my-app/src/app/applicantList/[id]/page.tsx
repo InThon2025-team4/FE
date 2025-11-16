@@ -121,18 +121,13 @@ function ApplicantCard({ applicant }: { applicant: Applicant }) {
         {/* Name and Avatar */}
         <div className="flex items-center gap-1.5">
           <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center shrink-0 overflow-hidden relative">
-            {applicant.avatar.startsWith("http") ? (
-              <Image
-                src={applicant.avatar}
-                alt={applicant.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <span className="text-sm font-medium text-[#0A0A0A]">
-                {applicant.avatar}
-              </span>
-            )}
+            <Image
+              src="/logo.png"
+              alt={applicant.name}
+              width={40}
+              height={40}
+              className="object-cover"
+            />
           </div>
           <h3 className="text-xl font-semibold text-black">{applicant.name}</h3>
         </div>
@@ -176,18 +171,13 @@ function ApplicantProfile({
       {/* Large Avatar and Name */}
       <div className="flex flex-col items-center gap-6">
         <div className="w-[184px] h-[186px] rounded-full bg-[#F5F5F5] flex items-center justify-center shrink-0 overflow-hidden relative">
-          {applicant.avatar.startsWith("http") ? (
-            <Image
-              src={applicant.avatar}
-              alt={applicant.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <span className="text-6xl font-semibold text-[#0A0A0A]">
-              {applicant.avatar}
-            </span>
-          )}
+          <Image
+            src="/logo.png"
+            alt={applicant.name}
+            width={184}
+            height={186}
+            className="object-cover"
+          />
         </div>
         <div className="flex items-center gap-3 justify-center">
           <h2 className="text-2xl font-semibold text-black text-center">

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { TierIcon } from "@/components/TierIcon";
 
@@ -65,10 +66,14 @@ export function ProjectCard({
         {/* Author Profile */}
         {author && (
           <div className="flex items-center gap-1.5">
-            <div className="w-6 h-6 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0">
-              <span className="text-xs font-medium text-white">
-                {author.avatar || author.name.substring(0, 2).toUpperCase()}
-              </span>
+            <div className="w-6 h-6 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0 overflow-hidden relative">
+              <Image
+                src="/logo.png"
+                alt={author.name}
+                width={24}
+                height={24}
+                className="object-cover"
+              />
             </div>
             <span className="text-sm font-medium text-black">
               {author.name}

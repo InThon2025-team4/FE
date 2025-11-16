@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { TierIcon } from "@/components/TierIcon";
 import type { UserProfile } from "./MyPageView";
@@ -13,10 +14,14 @@ export function UserProfileSection({ profile }: UserProfileSectionProps) {
     <div className="flex flex-col gap-6">
       {/* Avatar and Basic Info */}
       <div className="flex items-start gap-6">
-        <div className="w-24 h-24 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0">
-          <span className="text-3xl font-semibold text-white">
-            {profile.initials}
-          </span>
+        <div className="w-24 h-24 rounded-full bg-[#F5F5F5] flex items-center justify-center shrink-0 overflow-hidden">
+          <Image
+            src="/logo.png"
+            alt={profile.name}
+            width={96}
+            height={96}
+            className="object-cover"
+          />
         </div>
         <div className="flex flex-col gap-2 flex-1">
           <div className="flex items-center gap-3">
