@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { completeOnboarding, OnboardingData } from "@/lib/auth";
+import { setAuthorizationHeader } from "@/lib/api/projects";
 
 export default function OnBoardingPage() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function OnBoardingPage() {
       if (!result.success) {
         throw new Error(result.message || "온보딩 실패");
       }
-
+      setAuthorizationHeader(result.accessToken || "");
       console.log("Onboarding completed successfully");
       // 대시보드로 리다이렉트
       router.push("/dashboard");

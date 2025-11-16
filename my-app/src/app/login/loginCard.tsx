@@ -51,7 +51,9 @@ export function LoginCard() {
 
         setTimeout(() => {
           router.push(
-            `/onboarding?supabaseToken=${encodeURIComponent(result.supabaseAccessToken || "")}&email=${encodeURIComponent(result.email || "")}`
+            `/onboarding?supabaseToken=${encodeURIComponent(
+              result.supabaseAccessToken || ""
+            )}&email=${encodeURIComponent(result.email || "")}`
           );
         }, 1500);
       } else if (result.success && result.token) {
@@ -59,7 +61,7 @@ export function LoginCard() {
         setDialogTitle("성공");
         setDialogMessage(result.message || "로그인 성공!");
         setDialogOpen(true);
-        setAuthorizationHeader(result.token || "");
+        setAuthorizationHeader(result.accessToken || "");
         // Redirect after short delay
         setTimeout(() => {
           router.push("/dashboard");
