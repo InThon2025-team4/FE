@@ -109,9 +109,10 @@ export default function DashboardView() {
         const response = await getDashboardProjects();
         if (response.success && response.data) {
           // Transform API data to display format
-          const transformedProjects = response.data.map((project: Project) => ({
+          console.log(response.data);
+          const transformedProjects = response.data.map((project) => ({
             id: project.id,
-            title: project.title,
+            title: project.name,
             daysAgo: calculateDaysAgo(project.createdAt),
             difficulty: mapDifficulty(project.difficulty),
             positions: extractPositions(project.positions),

@@ -5,26 +5,25 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_EXCHANGE_URL;
 // Types
 export interface Project {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  status: string;
-  createdAt: string;
-  startDate: string;
-  deadline: string;
-  duration: string;
   difficulty: string;
-  positions: {
-    frontend?: string;
-    backend?: string;
-    ai?: string;
-    mobile?: string;
-  };
-  author: {
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
-  };
+  recruitmentStartDate: string;
+  recruitmentEndDate: string;
+  projectStartDate: string;
+  projectEndDate: string;
+  githubRepoUrl: "string";
+  limitBE: 0;
+  limitFE: 0;
+  limitPM: 0;
+  limitMobile: 0;
+  limitAI: 0;
+  ownerId: "string";
+  owner: {};
+  memberCount: 0;
+  applicationCount: 0;
+  createdAt: "2025-11-16T00:40:41.971Z";
+  updatedAt: "2025-11-16T00:40:41.971Z";
 }
 
 export interface ProjectListResponse {
@@ -118,7 +117,7 @@ export interface OnboardingResponse {
  */
 export async function getDashboardProjects(): Promise<ProjectListResponse> {
   try {
-    const response = await axios.get(`${API_BASE_URL}/project/dashboard`);
+    const response = await axios.get(`${API_BASE_URL}/project`);
     return {
       success: true,
       data: response.data,

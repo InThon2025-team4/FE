@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { signInWithSupabase } from "@/lib/auth";
+import { setAuthorizationHeader } from "@/lib/api/projects";
 
 export function LoginCard() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export function LoginCard() {
         setDialogTitle("성공");
         setDialogMessage(result.message || "로그인 성공!");
         setDialogOpen(true);
-
+        setAuthorizationHeader(result.token || "");
         // Redirect after short delay
         setTimeout(() => {
           router.push("/dashboard");
