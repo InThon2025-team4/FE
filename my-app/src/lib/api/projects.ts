@@ -376,11 +376,11 @@ export async function createProject(
  * Apply to a project
  * POST /project/{id}/apply
  * @param projectId - Project ID
- * @param applicationData - Application data (position, introduction)
+ * @param applicationData - Application data (appliedPosition array, optional coverLetter)
  */
 export async function applyToProject(
   projectId: string,
-  applicationData: { position: string; introduction: string }
+  applicationData: { appliedPosition: string[]; coverLetter?: string }
 ): Promise<ApplicationResponse> {
   try {
     const response = await axios.post(
@@ -602,6 +602,10 @@ export function setAuthorizationHeader(token: string) {
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
+/**
+ * Get all applications for a project
+ * GET /project/{id}/applications
+ */
 /**
  * Clear authorization header
  * Call this when user logs out

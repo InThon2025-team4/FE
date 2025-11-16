@@ -52,10 +52,21 @@ export function ApplyModal({
     setLoading(true);
 
     try {
-      // Call backend API to create application
+      const positionMap: Record<string, string> = {
+        frontend: "FRONTEND",
+        backend: "BACKEND",
+        ai: "AI",
+        mobile: "MOBILE",
+      };
+
+      const backendPosition = positionMap[selectedPosition];
+      if (!backendPosition) {
+        alert("올바른 포지션을 선택해주세요.");
+        return;
+      }
       const result = await applyToProject(projectId, {
-        position: selectedPosition,
-        introduction: introduction.trim(),
+        appliedPosition: [backendPosition],
+        coverLetter: introduction.trim(),
       });
 
       if (!result.success) {

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Header } from "@/components/Header";
 import { ApplyModal } from "./[id]/ApplyModal";
 import { getProjectById, Project } from "@/lib/api/projects";
 import { TierIcon } from "@/components/TierIcon";
@@ -123,22 +124,22 @@ export function ViewProject() {
     {
       label: "프론트엔드",
       value: "frontend",
-      available: Boolean(projectData.currentFE?.valueOf()),
+      available: projectData.currentFE < projectData.limitFE,
     },
     {
       label: "백엔드",
       value: "backend",
-      available: Boolean(projectData.currentBE?.valueOf()),
+      available: projectData.currentBE < projectData.limitBE,
     },
     {
       label: "인공지능",
       value: "ai",
-      available: Boolean(projectData.currentAI?.valueOf()),
+      available: projectData.currentAI < projectData.limitAI,
     },
     {
       label: "모바일",
       value: "mobile",
-      available: Boolean(projectData.currentMobile?.valueOf()),
+      available: projectData.currentMobile < projectData.limitMobile,
     },
   ];
 
@@ -148,37 +149,14 @@ export function ViewProject() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col items-center">
       {/* Header */}
-      <header className="h-16 border-b border-[#E5E5E5] flex items-center justify-center">
-        <div className="w-full max-w-[1440px] px-6 flex items-center justify-between">
-          {/* Logo Section */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded border-2 border-[#DC143C]" />
-            <h1 className="text-base font-semibold text-[#0A0A0A]">
-              Service Name
-            </h1>
-          </div>
-
-          {/* User Avatar */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center overflow-hidden">
-              <Image
-                src="/logo.png"
-                alt={projectData.owner.name}
-                width={40}
-                height={40}
-                className="object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header userInitials="CN" showUser={true} />
 
       {/* Main Content */}
-      <main className="w-full max-w-[1156px] mx-auto px-5 py-0 pt-0 pb-[120px] flex flex-col items-center gap-[66px]">
+      <main className="w-full flex flex-col items-center gap-[66px] px-[142px] pb-[120px] pt-[71px]">
         {/* Title and Status Section */}
-        <div className="w-full flex flex-col items-center gap-[15px] pt-[66px]">
+        <div className="w-full flex flex-col items-center gap-[15px]">
           {/* Title Row */}
           <div className="w-full flex items-center justify-center gap-1.5">
             <div className="flex-1 flex flex-col justify-center gap-[15px]">
@@ -237,11 +215,11 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="프론트엔드"
-              value={`${projectData.currentFE}명` || "마감"}
+              value={`${projectData.currentFE}/${projectData.limitFE}명`}
             />
             <ProjectDetailItem
               label="백엔드"
-              value={`${projectData.currentBE}명` || "마감"}
+              value={`${projectData.currentBE}/${projectData.limitBE}명`}
             />
           </div>
 
@@ -249,11 +227,11 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around  gap-6">
             <ProjectDetailItem
               label="인공지능"
-              value={`${projectData.currentAI}명` || "마감"}
+              value={`${projectData.currentAI}/${projectData.limitAI}명`}
             />
             <ProjectDetailItem
               label="모바일"
-              value={`${projectData.currentMobile}명` || "마감"}
+              value={`${projectData.currentMobile}/${projectData.limitMobile}명`}
             />
           </div>
 

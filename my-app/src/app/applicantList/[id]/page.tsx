@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Header } from "@/components/Header";
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { updateApplicationStatus } from "@/lib/api/projects";
+import { updateApplicationStatus, getProjectApplications } from "@/lib/api/projects";
 
 interface Applicant {
   id: string;
@@ -36,67 +36,16 @@ interface Applicant {
 
 type PositionFilter = "프론트엔드" | "백엔드" | "AI" | "모바일";
 
-const mockApplicants: Applicant[] = [
-  {
-    id: "1",
-    userId: "user1",
-    name: "신청자 이름",
-    email: "user1@example.com",
-    position: "프론트엔드",
-    introduction: "예시 한줄소개입니다.",
-    status: "pending",
-    appliedAt: "2025-11-14T10:00:00Z",
-    daysAgo: "2일 전",
-    avatar: "CN",
-    tier: "GOLD",
-    techStack: ["Javascript", "React", "TypeScript"],
-    portfolio: "link.example.com",
-  },
-  {
-    id: "2",
-    userId: "user2",
-    name: "신청자 이름",
-    email: "user2@example.com",
-    position: "백엔드",
-    introduction: "백엔드 개발 경험이 풍부합니다.",
-    status: "pending",
-    appliedAt: "2025-11-14T10:00:00Z",
-    daysAgo: "2일 전",
-    avatar: "JD",
-    tier: "PLATINUM",
-    techStack: ["Node.js", "Express", "MongoDB"],
-    portfolio: "github.com/example",
-  },
-  {
-    id: "3",
-    userId: "user3",
-    name: "신청자 이름",
-    email: "user3@example.com",
-    position: "프론트엔드",
-    introduction: "UI/UX에 관심이 많습니다.",
-    status: "pending",
-    appliedAt: "2025-11-14T10:00:00Z",
-    daysAgo: "2일 전",
-    avatar: "KS",
-    tier: "SILVER",
-    techStack: ["Vue.js", "Nuxt.js", "CSS"],
-  },
-  {
-    id: "4",
-    userId: "user4",
-    name: "신청자 이름",
-    email: "user4@example.com",
-    position: "AI",
-    introduction: "머신러닝 전문가입니다.",
-    status: "pending",
-    appliedAt: "2025-11-14T10:00:00Z",
-    daysAgo: "3일 전",
-    avatar: "LM",
-    tier: "DIAMOND",
-    techStack: ["Python", "TensorFlow", "PyTorch"],
-    portfolio: "kaggle.com/example",
-  },
-];
+const positionEnumToKorean = (position: string): string => {
+  const positionMap: Record<string, string> = {
+    FRONTEND: "프론트엔드",
+    BACKEND: "백엔드",
+    AI: "AI",
+    MOBILE: "모바일",
+    PM: "PM",
+  };
+  return positionMap[position] || position;
+};
 
 const getPositionColor = (position: string) => {
   switch (position) {
@@ -252,6 +201,9 @@ export default function ApplicantListPage() {
   const params = useParams();
   const projectId = params.id as string;
 
+  const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(
     null
   );
@@ -268,15 +220,61 @@ export default function ApplicantListPage() {
     applicant: null,
   });
 
+  // Fetch applicants when component mounts
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getProjectApplications(projectId);
+        if (response.success && response.data) {
+          // Transform API data to Applicant format
+          const transformedApplicants = response.data.map((app: any) => {
+            const appliedDate = new Date(app.appliedAt || new Date());
+            const daysAgo = Math.floor((Date.now() - appliedDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            return {
+              id: app.id,
+              userId: app.user.id,
+              name: app.user.name,
+              email: app.user.email,
+              position: positionEnumToKorean(app.appliedPosition[0]),
+              introduction: app.coverLetter || app.user.introduction || "한줄소개 없음",
+              status: app.status || "pending",
+              appliedAt: app.appliedAt,
+              daysAgo: daysAgo === 0 ? "오늘" : `${daysAgo}일 전`,
+              avatar: app.user.name.substring(0, 2),
+              tier: app.user.proficiency || "UNKNOWN",
+              techStack: app.user.techStacks || [],
+              portfolio: app.user.portfolio?.githubUrl || undefined,
+            };
+          });
+          setApplicants(transformedApplicants);
+        } else {
+          setError(response.message || "지원자 목록을 불러올 수 없습니다.");
+        }
+      } catch (err) {
+        console.error("Error fetching applicants:", err);
+        setError("지원자 목록 로드 중 오류 발생");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (projectId) {
+      fetchApplicants();
+    }
+  }, [projectId]);
+
   // Filter applicants based on selected position filters
   const filteredApplicants = useMemo(() => {
     if (selectedFilters.size === 0) {
-      return mockApplicants;
+      return applicants;
     }
-    return mockApplicants.filter((applicant) =>
+    return applicants.filter((applicant: Applicant) =>
       selectedFilters.has(applicant.position as PositionFilter)
     );
-  }, [selectedFilters]);
+  }, [selectedFilters, applicants]);
 
   const toggleFilter = (filter: PositionFilter) => {
     setSelectedFilters((prev) => {
@@ -369,17 +367,31 @@ export default function ApplicantListPage() {
 
           {/* Applicant Cards */}
           <div className="flex flex-col gap-5 w-full px-3 py-4 max-h-[700px] overflow-y-auto scrollbar-custom">
-            {filteredApplicants.map((applicant) => (
-              <div
-                key={applicant.id}
-                onClick={() => setSelectedApplicant(applicant)}
-                className={`cursor-pointer transition-all ${
-                  selectedApplicant?.id === applicant.id ? "opacity-100" : ""
-                }`}
-              >
-                <ApplicantCard applicant={applicant} />
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-[#505050]">지원자 목록을 불러오는 중...</p>
               </div>
-            ))}
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : filteredApplicants.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-[#505050]">지원자가 없습니다.</p>
+              </div>
+            ) : (
+              filteredApplicants.map((applicant: Applicant) => (
+                <div
+                  key={applicant.id}
+                  onClick={() => setSelectedApplicant(applicant)}
+                  className={`cursor-pointer transition-all ${
+                    selectedApplicant?.id === applicant.id ? "opacity-100" : ""
+                  }`}
+                >
+                  <ApplicantCard applicant={applicant} />
+                </div>
+              ))
+            )}
           </div>
         </div>
 
