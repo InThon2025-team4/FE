@@ -90,6 +90,34 @@ export function ViewProject() {
     return name.substring(0, 2).toUpperCase();
   };
 
+  // Helper function to calculate project duration
+  const calculateDuration = (startDate: string, endDate: string): string => {
+    try {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 7) {
+        return `${diffDays}일`;
+      } else if (diffDays < 30) {
+        const weeks = Math.floor(diffDays / 7);
+        const remainingDays = diffDays % 7;
+        return remainingDays > 0
+          ? `${weeks}주 ${remainingDays}일`
+          : `${weeks}주`;
+      } else {
+        const months = Math.floor(diffDays / 30);
+        const remainingDays = diffDays % 30;
+        return remainingDays > 0
+          ? `${months}개월 ${remainingDays}일`
+          : `${months}개월`;
+      }
+    } catch (error) {
+      return "기간 미정";
+    }
+  };
+
   // Prepare available positions for the modal
   const availablePositions = [
     {
@@ -137,7 +165,7 @@ export function ViewProject() {
             <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center overflow-hidden">
               <Image
                 src="/logo.png"
-                alt={projectData.author.name}
+                alt={projectData.owner.name}
                 width={40}
                 height={40}
                 className="object-cover"
@@ -158,7 +186,7 @@ export function ViewProject() {
                 className=" text-1xl sm:text-3xl md:text-5xl lg:text-5xl
   font-semibold text-black leading-[1em] tracking-[-0.01em]"
               >
-                {projectData.title}
+                {projectData.name}
               </h2>
             </div>
             <div className="px-[18px]">
@@ -172,12 +200,12 @@ export function ViewProject() {
           <div className="w-full flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-full bg-[#488FE1] flex items-center justify-center shrink-0">
               <span className="text-sm font-medium text-white">
-                {getUserInitials(projectData.author.name)}
+                {getUserInitials(projectData.owner.name)}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-base font-medium text-[#0A0A0A]">
-                {projectData.author.name}
+                {projectData.owner.name}
               </span>
               <TierIcon tier="GOLD" size={20} />
             </div>
@@ -197,9 +225,12 @@ export function ViewProject() {
           <div className="w-full flex items-center justify-around gap-6">
             <ProjectDetailItem
               label="시작 예정"
-              value={projectData.startDate}
+              value={projectData.createdAt}
             />
-            <ProjectDetailItem label="모집 마감" value={projectData.deadline} />
+            <ProjectDetailItem
+              label="모집 마감"
+              value={projectData.projectEndDate}
+            />
           </div>
 
           {/* Row 2: Positions */}
@@ -228,7 +259,13 @@ export function ViewProject() {
 
           {/* Row 4: Duration and Difficulty */}
           <div className="w-full flex items-center justify-around  gap-6">
-            <ProjectDetailItem label="예상 기간" value={projectData.duration} />
+            <ProjectDetailItem
+              label="예상 기간"
+              value={calculateDuration(
+                projectData.projectStartDate,
+                projectData.projectEndDate
+              )}
+            />
             <div className="w-[235px] h-[29px] flex items-center gap-2">
               <span className="text-xs sm:text-sm md:text-base lg:text-lg text-[#505050] w-[100px]">
                 난이도

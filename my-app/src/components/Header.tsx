@@ -25,8 +25,8 @@ export function Header({ userInitials = "CN", showUser = true }: HeaderProps) {
                 <Image
                   src="/logo.png"
                   alt="User Avatar"
-                  width={40}
-                  height={40}
+                  width={24}
+                  height={24}
                   className="object-cover"
                 />
               </div>
