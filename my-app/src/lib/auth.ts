@@ -184,7 +184,7 @@ export async function signUp(data: SignUpData): Promise<AuthResponse> {
       return {
         success: true,
         message: "회원가입 성공! 온보딩을 진행해주세요.",
-        onboardingRequired: true,
+        requiresOnboarding: true,
         supabaseUid: authData.user.id,
         email: authData.user.email,
         token: authData.session.access_token,
@@ -298,7 +298,6 @@ export async function signInWithSupabase(
         return {
           success: false,
           message: "온보딩이 필요합니다.",
-          onboardingRequired: true,
           requiresOnboarding: true,
           supabaseUid: beResponse.supabaseUid,
           email: beResponse.email,
