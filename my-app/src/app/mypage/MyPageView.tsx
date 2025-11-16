@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,6 +9,8 @@ import { UserProfileSection } from "./UserProfileSection";
 import { EditProfileDialog } from "./EditProfileDialog";
 import { AppliedProjectsSection } from "./AppliedProjectsSection";
 import { OwnedProjectsSection } from "./OwnedProjectsSection";
+import { getAppliedProjects } from "@/lib/api/projects";
+import { getMyProjects } from "@/lib/api/projects";
 import App from "next/app";
 
 export interface UserProfile {
@@ -27,7 +29,7 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  status: "pending" | "accepted" | "rejected";
+  status: string;
   createdDate: string;
   deadline: string;
   positions: string[];
@@ -35,6 +37,104 @@ export interface Project {
 }
 
 export function MyPageView() {
+  const [appliedProjects, setAppliedProjects] = useState<Project[]>([]);
+  const [ownedProjects, setOwnedProjects] = useState<Project[]>([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getAppliedProjects();
+        if (response.success && response.data) {
+          // Transform API data to display format
+          console.log(response.data);
+          const transformedProjects = response.data.map((project) => ({
+            id: project.id,
+            title: project.name,
+            description: project.description,
+            status: "pending",
+            createdDate: project.createdAt,
+            deadline: formatDate(project.projectEndDate),
+            positions: extractPositions({
+              frontend: project.limitFE,
+              backend: project.limitBE,
+              ai: project.limitAI,
+            }),
+            applicantCount: project.applicationCount,
+          }));
+          setAppliedProjects(transformedProjects);
+        }
+      } catch (err) {
+        console.error("Error loading projects:", err);
+        setError("Failed to load projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getMyProjects();
+        if (response.success && response.data) {
+          // Transform API data to display format
+          console.log(response.data);
+          const transformedProjects = response.data.map((project) => ({
+            id: project.id,
+            title: project.name,
+            description: project.description,
+            status: "pending",
+            createdDate: project.createdAt,
+            deadline: formatDate(project.projectEndDate),
+            positions: extractPositions({
+              frontend: project.limitFE,
+              backend: project.limitBE,
+              ai: project.limitAI,
+            }),
+            applicantCount: project.applicationCount,
+          }));
+          setOwnedProjects(transformedProjects);
+        }
+      } catch (err) {
+        console.error("Error loading projects:", err);
+        setError("Failed to load projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  const extractPositions = (positions: {
+    frontend?: number;
+    backend?: number;
+    ai?: number;
+    mobile?: number;
+  }): string[] => {
+    const result: string[] = [];
+    if (positions.frontend) result.push("프론트엔드");
+    if (positions.backend) result.push("백엔드");
+    if (positions.ai) result.push("인공지능");
+    if (positions.mobile) result.push("모바일");
+    return result;
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}. ${month}. ${day}`;
+  };
+
   // Mock user data - replace with actual data from your API/auth
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: "사용자 이름",
@@ -46,74 +146,10 @@ export function MyPageView() {
     tier: "GOLD",
   });
 
-  // Mock applied projects - replace with actual data from your API
-  const [appliedProjects] = useState<Project[]>([
-    {
-      id: "1",
-      title: "프로젝트 제목입니다",
-      description: "프로젝트 설명이 여기에 표시됩니다.",
-      status: "pending",
-      createdDate: "2025. 11. 14",
-      deadline: "2025. 11. 20",
-      positions: ["Frontend", "Backend"],
-    },
-    {
-      id: "2",
-      title: "두 번째 프로젝트",
-      description: "두 번째 프로젝트 설명입니다.",
-      status: "accepted",
-      createdDate: "2025. 11. 10",
-      deadline: "2025. 11. 15",
-      positions: ["Frontend"],
-    },
-    {
-      id: "3",
-      title: "세 번째 프로젝트",
-      description: "세 번째 프로젝트 설명입니다.",
-      status: "rejected",
-      createdDate: "2025. 11. 05",
-      deadline: "2025. 11. 12",
-      positions: ["Backend", "AI"],
-    },
-    {
-      id: "4",
-      title: "세 번째 프로젝트",
-      description: "세 번째 프로젝트 설명입니다.",
-      status: "rejected",
-      createdDate: "2025. 11. 05",
-      deadline: "2025. 11. 12",
-      positions: ["Backend", "AI"],
-    },
-  ]);
-
   // track which tab is active: 'applied' = 지원한 프로젝트, 'owned' = 내 프로젝트
   const [selectedTab, setSelectedTab] = useState<"applied" | "owned">(
     "applied"
   );
-
-  // mock "내 프로젝트" list (replace with real data)
-  const [ownedProjects] = useState<Project[]>([
-    {
-      id: "o1",
-      title: "내 프로젝트 A",
-      description: "내가 만든 프로젝트 A 설명",
-      status: "accepted",
-      createdDate: "2025. 10. 01",
-      deadline: "2025. 12. 01",
-      positions: ["Frontend"],
-      applicationCount: 5,
-    },
-    {
-      id: "o2",
-      title: "내 프로젝트 B",
-      description: "내가 만든 프로젝트 B 설명",
-      status: "pending",
-      createdDate: "2025. 09. 15",
-      deadline: "2025. 11. 30",
-      positions: ["Backend", "AI"],
-      applicationCount: 3,
-    },
-  ]);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
