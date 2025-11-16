@@ -12,18 +12,18 @@ export interface Project {
   recruitmentEndDate: string;
   projectStartDate: string;
   projectEndDate: string;
-  githubRepoUrl: "string";
-  limitBE: 0;
-  limitFE: 0;
-  limitPM: 0;
-  limitMobile: 0;
-  limitAI: 0;
-  ownerId: "string";
-  owner: {};
-  memberCount: 0;
-  applicationCount: 0;
-  createdAt: "2025-11-16T00:40:41.971Z";
-  updatedAt: "2025-11-16T00:40:41.971Z";
+  githubRepoUrl: string;
+  limitBE: number;
+  limitFE: number;
+  limitPM: number;
+  limitMobile: number;
+  limitAI: number;
+  ownerId: string;
+  owner: any;
+  memberCount: number;
+  applicationCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProjectListResponse {

@@ -129,8 +129,8 @@ export default function DashboardView() {
             title: project.name,
             daysAgo: calculateDaysAgo(project.createdAt),
             difficulty: mapDifficulty(project.difficulty),
-            positions: extractPositions(project.positions),
-            deadline: formatDate(project.deadline),
+            positions: extractPositions({}),
+            deadline: formatDate(project.projectEndDate),
           }));
           setProjects(transformedProjects);
         } else {
