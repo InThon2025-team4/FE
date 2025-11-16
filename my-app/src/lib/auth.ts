@@ -307,7 +307,7 @@ export async function signInWithSupabase(
       return {
         success: false,
         message: "예상치 못한 응답 형식입니다.",
-        error: beResponse,
+        error: new Error("Unexpected response format"),
       };
     } catch (error) {
       const axiosError = error as any;
