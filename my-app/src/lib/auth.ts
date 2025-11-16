@@ -67,7 +67,6 @@ export interface AuthResponse {
   token?: string;
   accessToken?: string;
   error?: unknown;
-  onboardingRequired?: boolean;
   requiresOnboarding?: boolean;
   supabaseUid?: string;
   email?: string;
