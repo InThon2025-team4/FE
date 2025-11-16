@@ -43,7 +43,7 @@ export function LoginCard() {
         password,
       });
 
-      if (result.requiresOnboarding || result.onboardingRequired) {
+      if (result.requiresOnboarding) {
         // New user - redirect to onboarding
         setDialogTitle("환영합니다!");
         setDialogMessage("추가 정보를 입력해주세요.");
