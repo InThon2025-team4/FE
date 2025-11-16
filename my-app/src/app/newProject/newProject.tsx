@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { createProject } from "@/lib/api/projects";
 
 type PositionType = "FE" | "BE" | "AI" | "Mobile";
 
@@ -17,6 +19,7 @@ interface RecruitmentCount {
 }
 
 export function NewProjectView() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     title: "",
     startDate: "",
@@ -24,6 +27,7 @@ export function NewProjectView() {
     weeklyHours: "",
     deadline: "",
     description: "",
+    difficulty: "INTERMEDIATE",
   });
 
   const [recruitmentCounts, setRecruitmentCounts] = useState<RecruitmentCount>({
@@ -36,6 +40,9 @@ export function NewProjectView() {
   const [selectedPositions, setSelectedPositions] = useState<PositionType[]>(
     []
   );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const positionOptions: { value: PositionType; label: string }[] = [
     { value: "FE", label: "프론트엔드" },
@@ -64,15 +71,6 @@ export function NewProjectView() {
     }
   };
 
-  const handleCountChange = (position: PositionType, count: number) => {
-    if (count >= 0) {
-      setRecruitmentCounts((prev) => ({
-        ...prev,
-        [position]: count,
-      }));
-    }
-  };
-
   const handleIncrement = (position: PositionType) => {
     setRecruitmentCounts((prev) => ({
       ...prev,
@@ -88,32 +86,64 @@ export function NewProjectView() {
   };
 
   const handleSubmit = async () => {
-    // Transform form data to match server API format
-    const payload = {
-      name: formData.title,
-      description: formData.description,
-      difficulty: "INTERMEDIATE", // TODO: Add difficulty selector
-      recruitmentStartDate: new Date().toISOString(),
-      recruitmentEndDate: new Date(formData.deadline).toISOString(),
-      projectStartDate: new Date(formData.startDate).toISOString(),
-      projectEndDate: new Date(
-        new Date(formData.startDate).getTime() +
-          parseInt(formData.duration || "0") * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      githubRepoUrl: "",
-      limitFE: recruitmentCounts.FE,
-      limitBE: recruitmentCounts.BE,
-      limitAI: recruitmentCounts.AI,
-      limitMobile: recruitmentCounts.Mobile,
-    };
+    // Validate required fields
+    if (
+      !formData.title ||
+      !formData.startDate ||
+      !formData.duration ||
+      !formData.deadline ||
+      !formData.description
+    ) {
+      setError("모든 필수 항목을 입력해주세요.");
+      return;
+    }
 
-    console.log("Project data:", payload);
-    // TODO: Submit to backend API
-    // const response = await fetch('/api/projects', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(payload),
-    // });
+    if (selectedPositions.length === 0) {
+      setError("최소 한 개 이상의 포지션을 선택해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Transform form data to match server API format
+      const payload = {
+        name: formData.title,
+        description: formData.description,
+        difficulty: formData.difficulty,
+        recruitmentStartDate: new Date().toISOString(),
+        recruitmentEndDate: new Date(formData.deadline).toISOString(),
+        projectStartDate: new Date(formData.startDate).toISOString(),
+        projectEndDate: new Date(
+          new Date(formData.startDate).getTime() +
+            parseInt(formData.duration || "0") * 24 * 60 * 60 * 1000
+        ).toISOString(),
+        githubRepoUrl: "",
+        limitFE: recruitmentCounts.FE,
+        limitBE: recruitmentCounts.BE,
+        limitPM: 0,
+        limitAI: recruitmentCounts.AI,
+        limitMobile: recruitmentCounts.Mobile,
+      };
+
+      console.log("Creating project with data:", payload);
+
+      const response = await createProject(payload);
+
+      if (response.success) {
+        console.log("Project created successfully:", response.data);
+        // Navigate to the created project or dashboard
+        router.push(`/viewProject/${response.data.id}`);
+      } else {
+        setError(response.message || "프로젝트 생성에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error("Error creating project:", err);
+      setError("프로젝트 생성 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -185,16 +215,35 @@ export function NewProjectView() {
               {/* Expected Duration */}
               <div className="w-full flex flex-col gap-3">
                 <Label className="text-sm font-medium text-[#0A0A0A]">
-                  예상 기간
+                  예상 기간 (일)
                 </Label>
                 <Input
+                  type="number"
                   value={formData.duration}
                   onChange={(e) =>
                     setFormData({ ...formData, duration: e.target.value })
                   }
-                  placeholder="프로젝트 제목을 입력하세요"
+                  placeholder="예상 기간을 일수로 입력하세요"
                   className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs"
                 />
+              </div>
+
+              {/* Difficulty */}
+              <div className="w-full flex flex-col gap-3">
+                <Label className="text-sm font-medium text-[#0A0A0A]">
+                  난이도
+                </Label>
+                <select
+                  value={formData.difficulty}
+                  onChange={(e) =>
+                    setFormData({ ...formData, difficulty: e.target.value })
+                  }
+                  className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs"
+                >
+                  <option value="EASY">쉬움</option>
+                  <option value="INTERMEDIATE">보통</option>
+                  <option value="HARD">어려움</option>
+                </select>
               </div>
 
               {/* Weekly Hours */}
@@ -207,7 +256,7 @@ export function NewProjectView() {
                   onChange={(e) =>
                     setFormData({ ...formData, weeklyHours: e.target.value })
                   }
-                  placeholder="프로젝트 제목을 입력하세요"
+                  placeholder="주당 투자 시간을 입력하세요"
                   className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs"
                 />
               </div>
@@ -335,13 +384,21 @@ export function NewProjectView() {
                 </div>
               ))}
 
+              {/* Error Message */}
+              {error && (
+                <div className="w-full p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
               {/* Submit Button */}
               <Button
                 type="button"
                 onClick={handleSubmit}
-                className="w-full h-9 bg-[#DC143C] hover:bg-[#DC143C]/90 text-[#FAFAFA] text-base font-medium rounded-lg shadow-xs"
+                disabled={isSubmitting}
+                className="w-full h-9 bg-[#DC143C] hover:bg-[#DC143C]/90 text-[#FAFAFA] text-base font-medium rounded-lg shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                프로젝트 생성하기
+                {isSubmitting ? "생성 중..." : "프로젝트 생성하기"}
               </Button>
             </div>
           </div>

@@ -76,18 +76,19 @@ export interface ApplicationResponse {
 }
 
 export interface CreateProjectData {
-  title: string;
+  name: string;
   description: string;
-  startDate: string;
-  deadline: string;
-  duration: string;
   difficulty: string;
-  positions: {
-    frontend?: string;
-    backend?: string;
-    ai?: string;
-    mobile?: string;
-  };
+  recruitmentStartDate: string;
+  recruitmentEndDate: string;
+  projectStartDate: string;
+  projectEndDate: string;
+  githubRepoUrl?: string;
+  limitBE: number;
+  limitFE: number;
+  limitPM?: number;
+  limitMobile: number;
+  limitAI: number;
 }
 
 export interface UpdateProjectData {
