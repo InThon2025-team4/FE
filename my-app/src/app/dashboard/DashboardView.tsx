@@ -166,7 +166,14 @@ export default function DashboardView() {
     return `${diffDays}일 전`;
   };
 
-  const mapDifficulty = (difficulty: string): "쉬움" | "보통" | "어려움" => {
+  const mapDifficulty = (difficulty: string | null | undefined): "쉬움" | "보통" | "어려움" => {
+    if (!difficulty) return "보통";
+    const upperDiff = difficulty.toUpperCase();
+    if (upperDiff === "BEGINNER") return "쉬움";
+    if (upperDiff === "ADVANCED") return "어려움";
+    if (upperDiff === "INTERMEDIATE") return "보통";
+    if (upperDiff === "UNKNOWN") return "보통";
+    // Fallback for any string format
     const lowerDiff = difficulty.toLowerCase();
     if (lowerDiff.includes("easy") || lowerDiff.includes("쉬움")) return "쉬움";
     if (lowerDiff.includes("hard") || lowerDiff.includes("어려움"))

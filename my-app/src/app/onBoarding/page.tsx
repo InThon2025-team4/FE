@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { UserInfoCard } from "./userInfoCard";
 import { DevInfoCard } from "./devInfoCard";
 import { Card } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { completeOnboarding, OnboardingData } from "@/lib/auth";
 import { setAuthorizationHeader } from "@/lib/api/projects";
 
-export default function OnBoardingPage() {
+function OnBoardingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<"user" | "dev">("user");
@@ -109,5 +110,21 @@ export default function OnBoardingPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function OnBoardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen flex-col items-center justify-center gap-6">
+          <Card className="w-full max-w-sm flex items-center">
+            <div className="text-center">로딩 중...</div>
+          </Card>
+        </div>
+      }
+    >
+      <OnBoardingPageContent />
+    </Suspense>
   );
 }
