@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializeAuthState, getSupabaseSession } from "@/lib/supabaseClient";
+import { storeToken } from "@/lib/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -68,23 +69,34 @@ export default function AuthCallback() {
 
           const beResponse = await response.json();
 
-          // Step 4: 백엔드 응답에 따라 분기
-          if (beResponse.onboardingRequired) {
-            // 새 사용자 - 온보딩 페이지로 강제 이동
-            // supabaseToken과 email을 URL 파라미터로 전달
+          console.log("Backend /auth/supabase response:", {
+            hasAccessToken: !!beResponse.accessToken,
+            hasUser: !!beResponse.user,
+            requiresOnboarding: beResponse.requiresOnboarding,
+          });
+
+          // Case 1: 기존 사용자 (온보딩 완료)
+          // Response: { accessToken, user }
+          if (beResponse.accessToken && beResponse.user) {
+            console.log("Existing user detected, redirecting to dashboard");
+            storeToken(beResponse.accessToken);
+            router.push("/dashboard");
+            return;
+          }
+
+          // Case 2: 신규 사용자 (온보딩 필요)
+          // Response: { requiresOnboarding: true, supabaseUid, email, displayName, supabaseAccessToken }
+          if (beResponse.requiresOnboarding === true && beResponse.supabaseAccessToken) {
             console.log("New user detected, redirecting to onboarding");
             router.push(
-              `/onboarding?supabaseToken=${encodeURIComponent(supabaseAccessToken)}&email=${encodeURIComponent(beResponse.email || session.user.email)}`
+              `/onboarding?supabaseToken=${encodeURIComponent(beResponse.supabaseAccessToken)}&email=${encodeURIComponent(beResponse.email || session.user.email)}`
             );
-          } else if (beResponse.token) {
-            // 기존 사용자 - JWT 토큰 저장 후 대시보드로 이동
-            console.log("Existing user detected, redirecting to dashboard");
-            localStorage.setItem("jwtToken", beResponse.token);
-            // Supabase 세션은 유지하되, 이후 요청은 JWT 사용
-            router.push("/dashboard");
-          } else {
-            throw new Error("예상치 못한 응답 형식: token 또는 onboardingRequired 필요");
+            return;
           }
+
+          // Case 3: 예상치 못한 응답 형식
+          console.error("Invalid backend response:", beResponse);
+          throw new Error("예상치 못한 응답 형식입니다.");
         } catch (backendError) {
           console.error("Backend communication error:", backendError);
           setError(
