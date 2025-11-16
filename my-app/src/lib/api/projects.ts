@@ -78,7 +78,7 @@ export interface ApplicationResponse {
 export interface CreateProjectData {
   name: string;
   description: string;
-  difficulty: string;
+  difficulty: string | null;
   recruitmentStartDate: string;
   recruitmentEndDate: string;
   projectStartDate: string;

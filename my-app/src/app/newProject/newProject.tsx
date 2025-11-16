@@ -27,7 +27,7 @@ export function NewProjectView() {
     weeklyHours: "",
     deadline: "",
     description: "",
-    difficulty: "INTERMEDIATE",
+    difficulty: null as string | null,
   });
 
   const [recruitmentCounts, setRecruitmentCounts] = useState<RecruitmentCount>({
@@ -234,15 +234,16 @@ export function NewProjectView() {
                   난이도
                 </Label>
                 <select
-                  value={formData.difficulty}
+                  value={formData.difficulty ?? ""}
                   onChange={(e) =>
-                    setFormData({ ...formData, difficulty: e.target.value })
+                    setFormData({ ...formData, difficulty: e.target.value || null })
                   }
                   className="h-auto py-1 px-3 text-base bg-white border border-[#E5E5E5] rounded-md shadow-xs"
                 >
-                  <option value="EASY">쉬움</option>
-                  <option value="INTERMEDIATE">보통</option>
-                  <option value="HARD">어려움</option>
+                  <option value="">난이도 선택</option>
+                  <option value="BEGINNER">초급</option>
+                  <option value="INTERMEDIATE">중급</option>
+                  <option value="ADVANCED">고급</option>
                 </select>
               </div>
 
